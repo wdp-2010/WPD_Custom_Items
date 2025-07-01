@@ -7,6 +7,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
+import java.util.Arrays;
+import java.util.Collections;
+
 import static org.bukkit.ChatColor.*;
 
 public class GiveSwordCommand implements CommandExecutor {
@@ -43,6 +46,12 @@ public class GiveSwordCommand implements CommandExecutor {
             meta.getPersistentDataContainer().set(plugin.damageKey, PersistentDataType.INTEGER, damage);
             meta.getPersistentDataContainer().set(plugin.colorKey, PersistentDataType.STRING, color);
             meta.getPersistentDataContainer().set(plugin.knockbackKey, PersistentDataType.DOUBLE, knockback);
+            meta.setLore(Arrays.asList(
+                    "Damage: " + damage,
+                    "Color: " + color,
+                    "Knockback: " + knockback
+            ));
+
             sword.setItemMeta(meta);
 
             player.getInventory().addItem(sword);
