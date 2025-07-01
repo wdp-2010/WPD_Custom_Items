@@ -117,10 +117,11 @@ public class BeamHandler implements Listener {
                         new Particle.DustOptions(beamSword.color, 1)
                 );
                 player.getWorld().spawnParticle(
-                        Particle.DUST,
+                        Particle.CLOUD,
                         point,
-                        1,
-                        new Particle.DustOptions(beamSword.color, 1)
+                        3,
+                        0.2, 0.2, 0.2,
+                        0.01
                 );
 
                 i++;
