@@ -1,5 +1,9 @@
 # WDP Custom Items Config
 
+beam-damage: 5
+
+knockback: 3
+
 # Cooldown in seconds between beam shots
 cooldown: 5.0
 
