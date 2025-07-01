@@ -48,6 +48,7 @@ public class WdpCustomItems extends JavaPlugin {
 
         // Register the recipe here
         registerBoltRecipe();
+        registerBeamSwordRecipe();
 
         getServer().getPluginManager().registerEvents(new BeamHandler(this), this);
         getServer().getPluginManager().registerEvents(new RecolorCraftHandler(this), this);
@@ -109,11 +110,11 @@ public class WdpCustomItems extends JavaPlugin {
         getServer().addRecipe(recipe);
     }
     public void registerBeamSwordRecipe() {
-        ItemStack result = createCustomBeamSword(getConfig().getInt("beam-damage", 5), "RED", getConfig().getDouble("knockback", 1.5));  // example stats
+        ItemStack result = createCustomBeamSword(getConfig().getInt("beam-damage", 5), "RED", getConfig().getDouble("knockback", 1.5));  //  config
 
         ShapedRecipe recipe = new ShapedRecipe(new NamespacedKey(this, "beam_sword"), result);
 
-        // Define shape: example shape, you can adjust
+        // Define shape: example shape, you can adjust (DONE)
         recipe.shape(
                 " N ",
                 "DSD",
