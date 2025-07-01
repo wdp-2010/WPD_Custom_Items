@@ -1,6 +1,5 @@
 package com.wdpserver.wdpcustomitems;
 
-import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -29,7 +28,7 @@ public class RecolorCraftHandler implements Listener {
             if (item == null) continue;
 
             if (item.getType() == Material.DIAMOND_SWORD) {
-                if (item.hasItemMeta() && item.getItemMeta().getPersistentDataContainer().has(plugin.swordKey, PersistentDataType.BYTE)) {
+                if (item.hasItemMeta() && item.getItemMeta().getPersistentDataContainer().has(plugin.beamSwordKey, PersistentDataType.BYTE)) {
                     sword = item;
                 }
             } else if (item.getType().name().endsWith("_DYE")) {
@@ -49,13 +48,13 @@ public class RecolorCraftHandler implements Listener {
         String dyeColor = getColorFromDye(dye);
 
         // Update the color NBT
-        meta.getPersistentDataContainer().set(plugin.colorKey, PersistentDataType.STRING, dyeColor);
+        meta.getPersistentDataContainer().set(plugin.beamColorKey, PersistentDataType.STRING, dyeColor);
 
         // Update lore
         meta.setLore(java.util.Arrays.asList(
-                "§7Damage: §f" + meta.getPersistentDataContainer().get(plugin.damageKey, PersistentDataType.INTEGER),
+                "§7Damage: §f" + meta.getPersistentDataContainer().get(plugin.beamDamageKey, PersistentDataType.INTEGER),
                 "§7Color: §f" + dyeColor,
-                "§7Knockback: §f" + meta.getPersistentDataContainer().get(plugin.knockbackKey, PersistentDataType.DOUBLE)
+                "§7Knockback: §f" + meta.getPersistentDataContainer().get(plugin.beamKnockbackKey, PersistentDataType.DOUBLE)
         ));
 
         newSword.setItemMeta(meta);

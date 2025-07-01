@@ -14,11 +14,11 @@ import java.util.*;
 
 public class WdpCustomItems extends JavaPlugin {
 
-    public NamespacedKey swordKey;
+    public NamespacedKey beamSwordKey;
     public NamespacedKey boltKey;
-    public NamespacedKey damageKey;
-    public NamespacedKey colorKey;
-    public NamespacedKey knockbackKey;
+    public NamespacedKey beamDamageKey;
+    public NamespacedKey beamColorKey;
+    public NamespacedKey beamKnockbackKey;
 
     public final Map<UUID, Long> cooldowns = new HashMap<>();
     public final Map<UUID, BossBar> cooldownBars = new HashMap<>();
@@ -39,11 +39,11 @@ public class WdpCustomItems extends JavaPlugin {
         saveDefaultConfig();
 
         // Namespaced keys
-        swordKey = new NamespacedKey(this, "plugin_sword");
+        beamSwordKey = new NamespacedKey(this, "plugin_sword");
         boltKey = new NamespacedKey(this, "boltkey");
-        damageKey = new NamespacedKey(this, "beam_damage");
-        colorKey = new NamespacedKey(this, "beam_color");
-        knockbackKey = new NamespacedKey(this, "beam_knockback");
+        beamDamageKey = new NamespacedKey(this, "beam_damage");
+        beamColorKey = new NamespacedKey(this, "beam_color");
+        beamKnockbackKey = new NamespacedKey(this, "beam_knockback");
 
         cooldownTimeMs = (long) (getConfig().getDouble("cooldown", 5.0) * 1000);
 

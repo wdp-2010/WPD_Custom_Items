@@ -8,7 +8,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 import static org.bukkit.ChatColor.*;
 
@@ -42,10 +41,10 @@ public class GiveSwordCommand implements CommandExecutor {
             ItemStack sword = new ItemStack(Material.DIAMOND_SWORD);
             ItemMeta meta = sword.getItemMeta();
             meta.setDisplayName("§bCustom Beam Sword");
-            meta.getPersistentDataContainer().set(plugin.swordKey, PersistentDataType.BYTE, (byte) 1);
-            meta.getPersistentDataContainer().set(plugin.damageKey, PersistentDataType.INTEGER, damage);
-            meta.getPersistentDataContainer().set(plugin.colorKey, PersistentDataType.STRING, color);
-            meta.getPersistentDataContainer().set(plugin.knockbackKey, PersistentDataType.DOUBLE, knockback);
+            meta.getPersistentDataContainer().set(plugin.beamSwordKey, PersistentDataType.BYTE, (byte) 1);
+            meta.getPersistentDataContainer().set(plugin.beamDamageKey, PersistentDataType.INTEGER, damage);
+            meta.getPersistentDataContainer().set(plugin.beamColorKey, PersistentDataType.STRING, color);
+            meta.getPersistentDataContainer().set(plugin.beamKnockbackKey, PersistentDataType.DOUBLE, knockback);
             meta.setLore(Arrays.asList(
                     "Damage: " + damage,
                     "Color: " + color,

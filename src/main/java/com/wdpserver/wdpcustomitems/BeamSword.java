@@ -15,15 +15,15 @@ public class BeamSword {
         ItemMeta meta = item.getItemMeta();
         PersistentDataContainer container = meta.getPersistentDataContainer();
 
-        this.damage = container.getOrDefault(plugin.damageKey, PersistentDataType.INTEGER, 5);
+        this.damage = container.getOrDefault(plugin.beamDamageKey, PersistentDataType.INTEGER, 5);
 
-        String colorName = container.getOrDefault(plugin.colorKey, PersistentDataType.STRING, "RED");
+        String colorName = container.getOrDefault(plugin.beamColorKey, PersistentDataType.STRING, "RED");
         try {
             this.color = (Color) Color.class.getField(colorName).get(null);
         } catch (Exception e) {
             this.color = Color.RED;
         }
 
-        this.knockback = container.getOrDefault(plugin.knockbackKey, PersistentDataType.DOUBLE, 1.5);
+        this.knockback = container.getOrDefault(plugin.beamKnockbackKey, PersistentDataType.DOUBLE, 1.5);
     }
 }
