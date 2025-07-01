@@ -5,8 +5,11 @@ website: wdpserver.com
 # play.wdpserver.com
 
 ## beam sword
-beam config:
+**beam config:**
  - damage
  - knockback
  - cooldown
  - range
+**ability:**
+- bolt: spawn lightning at target!
+- color: change your color of the beam with dye!
