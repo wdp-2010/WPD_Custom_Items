@@ -5,8 +5,7 @@ website: wdpserver.com
 # play.wdpserver.com
 
 ## beam sword
-config:
-- beam:
+beam config:
  - damage
  - knockback
  - cooldown
