@@ -1,0 +1,10 @@
+# WDP Custom Items Config
+
+# Cooldown in seconds between beam shots
+cooldown: 5.0
+
+# How many ticks between each particle step of the beam
+beam-speed: 1
+
+# Maximum beam distance in blocks
+range: 50.0
