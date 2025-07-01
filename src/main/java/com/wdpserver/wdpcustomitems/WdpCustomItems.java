@@ -64,7 +64,7 @@ public class WdpCustomItems extends JavaPlugin {
         ItemMeta meta = bolt.getItemMeta();
         meta.setDisplayName("§bLightning Bolt");
         meta.getPersistentDataContainer().set(boltKey, PersistentDataType.BYTE, (byte) 1);
-        meta.setLore(Collections.singletonList("With this in your inventory, the beam spawns lightning."));
+        meta.setLore(Collections.singletonList("With this in your inventory, the Epic Sword spawn lightning."));
         bolt.setItemMeta(meta);
 
         ShapedRecipe recipe = new ShapedRecipe(boltKey, bolt);
