@@ -10,6 +10,7 @@ website: wdpserver.com
  - knockback
  - cooldown
  - range
+
 **ability:**
 - bolt: spawn lightning at target!
 - color: change your color of the beam with dye!
