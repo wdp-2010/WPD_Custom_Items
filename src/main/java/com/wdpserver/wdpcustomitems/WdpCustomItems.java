@@ -5,6 +5,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.boss.BossBar;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -27,6 +28,14 @@ public class WdpCustomItems extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        ShapelessRecipe recolorRecipe = new ShapelessRecipe(
+                new NamespacedKey(this, "recolor_red"),
+                new ItemStack(Material.DIAMOND_SWORD)
+        );
+        recolorRecipe.addIngredient(Material.DIAMOND_SWORD);
+        recolorRecipe.addIngredient(Material.RED_DYE);
+        getServer().addRecipe(recolorRecipe);
+
         saveDefaultConfig();
 
         // Namespaced keys
@@ -42,6 +51,8 @@ public class WdpCustomItems extends JavaPlugin {
         registerBoltRecipe();
 
         getServer().getPluginManager().registerEvents(new BeamHandler(this), this);
+        getServer().getPluginManager().registerEvents(new RecolorCraftHandler(this), this);
+
 
         Objects.requireNonNull(getCommand("givesword")).setExecutor(new GiveSwordCommand(this));
         Objects.requireNonNull(getCommand("reloadconfig")).setExecutor((sender, command, label, args) -> {
@@ -78,5 +89,6 @@ public class WdpCustomItems extends JavaPlugin {
 
         getServer().addRecipe(recipe);
     }
+
 
 }
