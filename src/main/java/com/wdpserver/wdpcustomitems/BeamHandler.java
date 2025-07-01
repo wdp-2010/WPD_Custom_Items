@@ -94,13 +94,16 @@ public class BeamHandler implements Listener {
 
                 for (Entity e : point.getWorld().getNearbyEntities(point, 0.5, 0.5, 0.5)) {
                     if (e instanceof LivingEntity && e != player && hitEntities.add(e.getUniqueId())) {
+
                         LivingEntity target = (LivingEntity) e;
-                        target.setVelocity(direction.clone().multiply(beamSword.knockback));
-                        target.damage(beamSword.damage, player);
-                        target.setNoDamageTicks(5);
                         if (hasBolt) {
                             target.getWorld().strikeLightning(target.getLocation());
                         }
+
+                        target.setVelocity(direction.clone().multiply(beamSword.knockback));
+                        target.damage(beamSword.damage, player);
+                        target.setNoDamageTicks(5);
+
                     }
                 }
 
