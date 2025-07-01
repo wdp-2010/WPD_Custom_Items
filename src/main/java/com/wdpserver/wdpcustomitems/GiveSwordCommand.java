@@ -40,7 +40,7 @@ public class GiveSwordCommand implements CommandExecutor {
 
             ItemStack sword = new ItemStack(Material.DIAMOND_SWORD);
             ItemMeta meta = sword.getItemMeta();
-            meta.setDisplayName("§bCustom Beam Sword");
+            meta.setDisplayName("§bGiven Beam Sword");
             meta.getPersistentDataContainer().set(plugin.beamSwordKey, PersistentDataType.BYTE, (byte) 1);
             meta.getPersistentDataContainer().set(plugin.beamDamageKey, PersistentDataType.INTEGER, damage);
             meta.getPersistentDataContainer().set(plugin.beamColorKey, PersistentDataType.STRING, color);
