@@ -74,7 +74,7 @@ public class WdpCustomItems extends JavaPlugin {
                 " E "
         );
         recipe.setIngredient('E', Material.EMERALD);
-        recipe.setIngredient('N', Material.DIAMOND);
+        recipe.setIngredient('N', Material.NETHER_STAR);
 
         getServer().addRecipe(recipe);
     }
