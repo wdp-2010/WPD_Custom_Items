@@ -60,14 +60,14 @@ public class WdpCustomItems extends JavaPlugin {
     }
 
     private void registerBoltRecipe() {
-        ItemStack speedStone = new ItemStack(Material.NETHER_STAR);
-        ItemMeta meta = speedStone.getItemMeta();
+        ItemStack bolt = new ItemStack(Material.NETHER_STAR);
+        ItemMeta meta = bolt.getItemMeta();
         meta.setDisplayName("§bLightning Bolt");
         meta.getPersistentDataContainer().set(boltKey, PersistentDataType.BYTE, (byte) 1);
         meta.setLore(Collections.singletonList("With this in your inventory, the beam spawns lightning."));
-        speedStone.setItemMeta(meta);
+        bolt.setItemMeta(meta);
 
-        ShapedRecipe recipe = new ShapedRecipe(boltKey, speedStone);
+        ShapedRecipe recipe = new ShapedRecipe(boltKey, bolt);
         recipe.shape(
                 " E ",
                 "ENE",
