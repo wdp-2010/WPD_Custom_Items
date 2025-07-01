@@ -13,7 +13,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.*;
 
 public class WdpCustomItems extends JavaPlugin {
-
     public NamespacedKey beamSwordKey;
     public NamespacedKey boltKey;
     public NamespacedKey beamDamageKey;
@@ -69,6 +68,26 @@ public class WdpCustomItems extends JavaPlugin {
     public void onDisable() {
         getLogger().info("WDP Custom Items disabled.");
     }
+    public ItemStack createCustomBeamSword(int damage, String color, double knockback) {
+        ItemStack sword = new ItemStack(Material.DIAMOND_SWORD);
+        ItemMeta meta = sword.getItemMeta();
+
+        meta.setDisplayName("§bBeam Sword");
+        meta.getPersistentDataContainer().set(beamSwordKey, PersistentDataType.BYTE, (byte) 1);
+        meta.getPersistentDataContainer().set(beamDamageKey, PersistentDataType.INTEGER, damage);
+        meta.getPersistentDataContainer().set(beamColorKey, PersistentDataType.STRING, color);
+        meta.getPersistentDataContainer().set(beamKnockbackKey, PersistentDataType.DOUBLE, knockback);
+
+        meta.setLore(Arrays.asList(
+                "§7Damage: §f" + damage,
+                "§7Color: §f" + color,
+                "§7Knockback: §f" + knockback
+        ));
+
+        sword.setItemMeta(meta);
+        return sword;
+    }
+
 
     private void registerBoltRecipe() {
         ItemStack bolt = new ItemStack(Material.NETHER_STAR);
@@ -89,6 +108,25 @@ public class WdpCustomItems extends JavaPlugin {
 
         getServer().addRecipe(recipe);
     }
+    public void registerBeamSwordRecipe() {
+        ItemStack result = createCustomBeamSword(getConfig().getInt("beam-damage", 5), "RED", getConfig().getDouble("knockback", 1.5));  // example stats
+
+        ShapedRecipe recipe = new ShapedRecipe(new NamespacedKey(this, "beam_sword"), result);
+
+        // Define shape: example shape, you can adjust
+        recipe.shape(
+                " N ",
+                "DSD",
+                " D "
+        );
+
+        recipe.setIngredient('N', Material.NETHER_STAR);
+        recipe.setIngredient('D', Material.DIAMOND);
+        recipe.setIngredient('S', Material.DIAMOND_SWORD);
+
+        getServer().addRecipe(recipe);
+    }
+
 
 
 }
