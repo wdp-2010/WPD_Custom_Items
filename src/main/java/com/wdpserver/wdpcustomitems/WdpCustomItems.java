@@ -83,8 +83,10 @@ public class WdpCustomItems extends JavaPlugin {
         meta.getPersistentDataContainer().set(beamColorKey, PersistentDataType.STRING, color);
         meta.getPersistentDataContainer().set(beamKnockbackKey, PersistentDataType.DOUBLE, knockback);
 
+        meta.setItemModel(new NamespacedKey("wdpserver","beam_stone"));
+
         meta.setLore(Arrays.asList(
-                "§4Beam:",
+                "§fBeam:",
                 "§7Damage: §f" + damage,
                 "§7Color: §f" + color,
                 "§7Knockback: §f" + knockback
@@ -94,11 +96,12 @@ public class WdpCustomItems extends JavaPlugin {
         return sword;
     }
     public ItemStack createBeamStone() {
-        ItemStack beamStone = new ItemStack(Material.NETHER_STAR);
+        ItemStack beamStone = new ItemStack(Material.SUNFLOWER);
         ItemMeta meta = beamStone.getItemMeta();
 
         meta.setDisplayName("§bBeam Stone");
         meta.getPersistentDataContainer().set(beamStoneKey, PersistentDataType.BYTE, (byte) 1);
+        meta.setItemModel(new NamespacedKey("wdpserver","Beam_Stone"));
 
         beamStone.setItemMeta(meta);
         return beamStone;
@@ -111,6 +114,8 @@ public class WdpCustomItems extends JavaPlugin {
         meta.setDisplayName("§bLightning Bolt");
         meta.getPersistentDataContainer().set(boltKey, PersistentDataType.BYTE, (byte) 1);
         meta.setLore(Collections.singletonList("With this in your inventory, the Epic Sword spawn lightning."));
+        meta.setItemModel(new NamespacedKey("wdpserver","bolt"));
+
         bolt.setItemMeta(meta);
 
         ShapedRecipe recipe = new ShapedRecipe(boltKey, bolt);
