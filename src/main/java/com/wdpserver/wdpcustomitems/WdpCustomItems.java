@@ -20,6 +20,7 @@ public class WdpCustomItems extends JavaPlugin {
     public NamespacedKey beamColorKey;
     public NamespacedKey beamKnockbackKey;
     public NamespacedKey beamStoneKey;
+    public NamespacedKey throwStoneKey;
 
     public final Map<UUID, Long> cooldowns = new HashMap<>();
     public final Map<UUID, BossBar> cooldownBars = new HashMap<>();
@@ -46,6 +47,7 @@ public class WdpCustomItems extends JavaPlugin {
         beamColorKey = new NamespacedKey(this, "beam_color");
         beamKnockbackKey = new NamespacedKey(this, "beam_knockback");
         beamStoneKey = new NamespacedKey(this, "beamstone");
+        throwStoneKey = new NamespacedKey(this, "throwstone");
 
         cooldownTimeMs = (long) (getConfig().getDouble("cooldown", 5.0) * 1000);
 
@@ -94,6 +96,18 @@ public class WdpCustomItems extends JavaPlugin {
 
         sword.setItemMeta(meta);
         return sword;
+    }
+    public ItemStack createThrowRock() {
+        ItemStack ThrowRock = new ItemStack(Material.COBBLESTONE);
+        ItemMeta meta = ThrowRock.getItemMeta();
+
+        meta.setDisplayName("§bThrowable Stone");
+        meta.getPersistentDataContainer().set(throwStoneKey, PersistentDataType.BYTE, (byte) 1);
+        meta.setItemModel(new NamespacedKey("wdpserver","throw_rock"));
+
+        ThrowRock.setItemMeta(meta);
+        return ThrowRock;
+
     }
     public ItemStack createBeamStone() {
         ItemStack beamStone = new ItemStack(Material.NETHER_STAR);
