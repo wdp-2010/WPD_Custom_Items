@@ -4,6 +4,7 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.boss.BossBar;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -18,6 +19,7 @@ public class WdpCustomItems extends JavaPlugin {
     public NamespacedKey beamDamageKey;
     public NamespacedKey beamColorKey;
     public NamespacedKey beamKnockbackKey;
+    public NamespacedKey beamStoneKey;
 
     public final Map<UUID, Long> cooldowns = new HashMap<>();
     public final Map<UUID, BossBar> cooldownBars = new HashMap<>();
@@ -43,12 +45,14 @@ public class WdpCustomItems extends JavaPlugin {
         beamDamageKey = new NamespacedKey(this, "beam_damage");
         beamColorKey = new NamespacedKey(this, "beam_color");
         beamKnockbackKey = new NamespacedKey(this, "beam_knockback");
+        beamStoneKey = new NamespacedKey(this, "beamstone");
 
         cooldownTimeMs = (long) (getConfig().getDouble("cooldown", 5.0) * 1000);
 
         // Register the recipe here
         registerBoltRecipe();
         registerBeamSwordRecipe();
+        registerBeamStoneRecipe();
 
         getServer().getPluginManager().registerEvents(new BeamHandler(this), this);
         getServer().getPluginManager().registerEvents(new RecolorCraftHandler(this), this);
@@ -80,6 +84,7 @@ public class WdpCustomItems extends JavaPlugin {
         meta.getPersistentDataContainer().set(beamKnockbackKey, PersistentDataType.DOUBLE, knockback);
 
         meta.setLore(Arrays.asList(
+                "§4Beam:",
                 "§7Damage: §f" + damage,
                 "§7Color: §f" + color,
                 "§7Knockback: §f" + knockback
@@ -88,7 +93,17 @@ public class WdpCustomItems extends JavaPlugin {
         sword.setItemMeta(meta);
         return sword;
     }
+    public ItemStack createBeamStone() {
+        ItemStack beamStone = new ItemStack(Material.NETHER_STAR);
+        ItemMeta meta = beamStone.getItemMeta();
 
+        meta.setDisplayName("§bBeam Stone");
+        meta.getPersistentDataContainer().set(beamStoneKey, PersistentDataType.BYTE, (byte) 1);
+
+        beamStone.setItemMeta(meta);
+        return beamStone;
+
+    }
 
     private void registerBoltRecipe() {
         ItemStack bolt = new ItemStack(Material.NETHER_STAR);
@@ -111,7 +126,7 @@ public class WdpCustomItems extends JavaPlugin {
     }
     public void registerBeamSwordRecipe() {
         ItemStack result = createCustomBeamSword(getConfig().getInt("beam-damage", 5), "RED", getConfig().getDouble("knockback", 1.5));  //  config
-
+        ItemStack beamStone = createBeamStone();
         ShapedRecipe recipe = new ShapedRecipe(new NamespacedKey(this, "beam_sword"), result);
 
         // Define shape: example shape, you can adjust (DONE)
@@ -121,9 +136,27 @@ public class WdpCustomItems extends JavaPlugin {
                 " D "
         );
 
-        recipe.setIngredient('N', Material.NETHER_STAR);
+        recipe.setIngredient('N', new RecipeChoice.ExactChoice(beamStone));
         recipe.setIngredient('D', Material.DIAMOND);
         recipe.setIngredient('S', Material.DIAMOND_SWORD);
+
+        getServer().addRecipe(recipe);
+    }
+    public void registerBeamStoneRecipe() {
+        ItemStack result = createBeamStone();
+
+        ShapedRecipe recipe = new ShapedRecipe(new NamespacedKey(this, "beam_stone"), result);
+
+        // Define shape: example shape, you can adjust (DONE)
+        recipe.shape(
+                " N ",
+                "DFD",
+                " D "
+        );
+
+        recipe.setIngredient('N', Material.NETHER_STAR);
+        recipe.setIngredient('D', Material.DIAMOND);
+        recipe.setIngredient('F', Material.SUNFLOWER);
 
         getServer().addRecipe(recipe);
     }
