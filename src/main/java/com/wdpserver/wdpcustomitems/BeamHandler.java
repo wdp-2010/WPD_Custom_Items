@@ -105,7 +105,6 @@ public class BeamHandler implements Listener {
                         }
 
                         target.damage(beamSword.damage, player);
-                        target.setNoDamageTicks(5);
 
                     }
                 }
