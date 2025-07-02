@@ -2,6 +2,7 @@
 very beta
 
 website: wdpserver.com
+discord: https://discord.gg/zcaW6QPG89
 
 **SEASON 2 (not yet active)**
 
