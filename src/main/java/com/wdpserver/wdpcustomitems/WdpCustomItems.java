@@ -58,6 +58,7 @@ public class WdpCustomItems extends JavaPlugin {
 
         getServer().getPluginManager().registerEvents(new BeamHandler(this), this);
         getServer().getPluginManager().registerEvents(new RecolorCraftHandler(this), this);
+        getServer().getPluginManager().registerEvents(new ThrowHandeler(this), this);
 
 
         Objects.requireNonNull(getCommand("givesword")).setExecutor(new GiveSwordCommand(this));
@@ -75,6 +76,7 @@ public class WdpCustomItems extends JavaPlugin {
     public void onDisable() {
         getLogger().info("WDP Custom Items disabled.");
     }
+
     public ItemStack createCustomBeamSword(int damage, String color, double knockback) {
         ItemStack sword = new ItemStack(Material.DIAMOND_SWORD);
         ItemMeta meta = sword.getItemMeta();
@@ -102,6 +104,7 @@ public class WdpCustomItems extends JavaPlugin {
         ItemMeta meta = ThrowRock.getItemMeta();
 
         meta.setDisplayName("§bThrowable Stone");
+        meta.setLore(Collections.singletonList("§fRight click to trow"));
         meta.getPersistentDataContainer().set(throwStoneKey, PersistentDataType.BYTE, (byte) 1);
         meta.setItemModel(new NamespacedKey("wdpserver","throw_rock"));
 
