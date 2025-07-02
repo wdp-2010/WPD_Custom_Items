@@ -55,6 +55,7 @@ public class WdpCustomItems extends JavaPlugin {
         registerBoltRecipe();
         registerBeamSwordRecipe();
         registerBeamStoneRecipe();
+        registerThrowStonerecipe();
 
         getServer().getPluginManager().registerEvents(new BeamHandler(this), this);
         getServer().getPluginManager().registerEvents(new RecolorCraftHandler(this), this);
