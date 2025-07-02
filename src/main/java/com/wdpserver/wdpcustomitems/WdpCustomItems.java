@@ -83,7 +83,7 @@ public class WdpCustomItems extends JavaPlugin {
         meta.getPersistentDataContainer().set(beamColorKey, PersistentDataType.STRING, color);
         meta.getPersistentDataContainer().set(beamKnockbackKey, PersistentDataType.DOUBLE, knockback);
 
-        meta.setItemModel(new NamespacedKey("wdpserver","beam_stone"));
+        meta.setItemModel(new NamespacedKey("wdpserver","beam_sword"));
 
         meta.setLore(Arrays.asList(
                 "§fBeam:",
@@ -96,12 +96,12 @@ public class WdpCustomItems extends JavaPlugin {
         return sword;
     }
     public ItemStack createBeamStone() {
-        ItemStack beamStone = new ItemStack(Material.SUNFLOWER);
+        ItemStack beamStone = new ItemStack(Material.NETHER_STAR);
         ItemMeta meta = beamStone.getItemMeta();
 
         meta.setDisplayName("§bBeam Stone");
         meta.getPersistentDataContainer().set(beamStoneKey, PersistentDataType.BYTE, (byte) 1);
-        meta.setItemModel(new NamespacedKey("wdpserver","Beam_Stone"));
+        meta.setItemModel(new NamespacedKey("wdpserver","beam_stone"));
 
         beamStone.setItemMeta(meta);
         return beamStone;
