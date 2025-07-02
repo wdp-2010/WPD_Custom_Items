@@ -108,7 +108,6 @@ public class WdpCustomItems extends JavaPlugin {
         meta.setDisplayName("§bThrowable Stone");
         meta.setLore(Collections.singletonList("§fRight click to trow"));
         meta.getPersistentDataContainer().set(throwStoneKey, PersistentDataType.BYTE, (byte) 1);
-        meta.setItemModel(new NamespacedKey("wdpserver","throw_rock"));
 
         ThrowRock.setItemMeta(meta);
         return ThrowRock;
