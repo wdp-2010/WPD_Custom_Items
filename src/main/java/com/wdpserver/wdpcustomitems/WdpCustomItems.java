@@ -103,6 +103,7 @@ public class WdpCustomItems extends JavaPlugin {
         ItemStack ThrowRock = new ItemStack(Material.COBBLESTONE);
         ItemMeta meta = ThrowRock.getItemMeta();
 
+        meta.setMaxStackSize(32);
         meta.setDisplayName("§bThrowable Stone");
         meta.setLore(Collections.singletonList("§fRight click to trow"));
         meta.getPersistentDataContainer().set(throwStoneKey, PersistentDataType.BYTE, (byte) 1);
@@ -179,6 +180,22 @@ public class WdpCustomItems extends JavaPlugin {
         recipe.setIngredient('N', Material.NETHER_STAR);
         recipe.setIngredient('D', Material.DIAMOND);
         recipe.setIngredient('F', Material.SUNFLOWER);
+
+        getServer().addRecipe(recipe);
+    }
+    public void registerThrowStonerecipe() {
+        ItemStack result = createThrowRock();
+        result.setAmount(9);
+
+        ShapedRecipe recipe = new ShapedRecipe(new NamespacedKey(this, "throw_stone"), result);
+
+        recipe.shape(
+                "CCC",
+                "CCC",
+                "CCC"
+        );
+
+        recipe.setIngredient('C', Material.COBBLESTONE);
 
         getServer().addRecipe(recipe);
     }
