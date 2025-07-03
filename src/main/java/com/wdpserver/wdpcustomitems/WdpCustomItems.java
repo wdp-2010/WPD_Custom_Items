@@ -21,6 +21,7 @@ public class WdpCustomItems extends JavaPlugin {
     public NamespacedKey beamKnockbackKey;
     public NamespacedKey beamStoneKey;
     public NamespacedKey throwStoneKey;
+    public NamespacedKey jumpBootsKey;
 
     public final Map<UUID, Long> cooldowns = new HashMap<>();
     public final Map<UUID, BossBar> cooldownBars = new HashMap<>();
@@ -56,6 +57,7 @@ public class WdpCustomItems extends JavaPlugin {
         registerBeamSwordRecipe();
         registerBeamStoneRecipe();
         registerThrowStonerecipe();
+        registerJumpBootsRecipe();
 
         getServer().getPluginManager().registerEvents(new BeamHandler(this), this);
         getServer().getPluginManager().registerEvents(new RecolorCraftHandler(this), this);
@@ -125,6 +127,15 @@ public class WdpCustomItems extends JavaPlugin {
         return beamStone;
 
     }
+    public ItemStack createJumpBoots() {
+        ItemStack jumpBoots = new ItemStack(Material.IRON_BOOTS);
+        ItemMeta meta = jumpBoots.getItemMeta();
+
+        meta.getPersistentDataContainer().set(jumpBootsKey, PersistentDataType.BYTE, (byte) 1);
+        jumpBoots.setItemMeta(meta);
+        return jumpBoots;
+    }
+
 
     private void registerBoltRecipe() {
         ItemStack bolt = new ItemStack(Material.NETHER_STAR);
@@ -196,6 +207,22 @@ public class WdpCustomItems extends JavaPlugin {
         );
 
         recipe.setIngredient('C', Material.COBBLESTONE);
+
+        getServer().addRecipe(recipe);
+    }
+    public void registerJumpBootsRecipe() {
+        ItemStack result = createJumpBoots();
+
+        ShapedRecipe recipe = new ShapedRecipe(new NamespacedKey(this, "throw_stone"), result);
+
+        recipe.shape(
+                "   ",
+                "I I",
+                "W W"
+        );
+
+        recipe.setIngredient('I', Material.IRON_INGOT);
+        recipe.setIngredient('W', Material.WIND_CHARGE);
 
         getServer().addRecipe(recipe);
     }
