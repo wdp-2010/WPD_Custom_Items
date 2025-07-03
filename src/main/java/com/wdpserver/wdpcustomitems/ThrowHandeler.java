@@ -62,7 +62,7 @@ public class ThrowHandeler implements Listener {
 
         // Attach cobble to the snowball
         snowball.addPassenger(display);
-
+        snowball.setInvisible(true);
         // Sound
         player.playSound(player.getLocation(), Sound.ENTITY_SNOWBALL_THROW, 1, 1);
     }
