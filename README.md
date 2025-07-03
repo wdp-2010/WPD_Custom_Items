@@ -19,3 +19,11 @@ discord: https://discord.gg/zcaW6QPG89
 **ability:**
 - bolt: spawn lightning at target!
 - color: change your color of the beam with dye!
+
+## throw stone
+**ability:**
+- damage on hit (3)
+
+## double jump boots
+**ability:**
+- jump in the air by pressing space twice on air 
