@@ -49,6 +49,7 @@ public class WdpCustomItems extends JavaPlugin {
         beamKnockbackKey = new NamespacedKey(this, "beam_knockback");
         beamStoneKey = new NamespacedKey(this, "beamstone");
         throwStoneKey = new NamespacedKey(this, "throwstone");
+        jumpBootsKey = new NamespacedKey(this, "dubllejumpboots");
 
         cooldownTimeMs = (long) (getConfig().getDouble("cooldown", 5.0) * 1000);
 
