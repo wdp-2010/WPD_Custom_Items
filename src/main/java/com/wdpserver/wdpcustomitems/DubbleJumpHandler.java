@@ -29,11 +29,6 @@ public class DubbleJumpHandler implements Listener {
         this.plugin = plugin;
     }
 
-    @Override
-    public void onEnable() {
-        Bukkit.getPluginManager().registerEvents(this, this);
-        plugin.jumpBootsKey = new NamespacedKey(this, "double_jump_boots");
-    }
 
     /**
      * Helper to check if boots have the PersistentData key.
