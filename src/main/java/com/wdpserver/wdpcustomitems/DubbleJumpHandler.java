@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class DubbleJumpHandler extends JavaPlugin implements Listener {
+public class DubbleJumpHandler implements Listener {
 
     private final Map<UUID, Boolean> wasOnGround = new HashMap<>();
     private final Map<UUID, Boolean> canDoubleJump = new HashMap<>();
