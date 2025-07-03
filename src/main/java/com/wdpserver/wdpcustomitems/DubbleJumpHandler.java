@@ -61,6 +61,7 @@ public class DubbleJumpHandler extends JavaPlugin implements Listener {
         // 1. If player just left ground
         if (wasGroundBefore && !onGround && hasBoots) {
             canDoubleJump.put(uuid, true);
+            p.sendMessage("you have double jump boots");
         }
 
         // 2. If player landed, reset
