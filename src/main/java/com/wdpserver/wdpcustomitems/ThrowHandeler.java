@@ -13,6 +13,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class ThrowHandeler implements Listener {
 
@@ -65,6 +66,25 @@ public class ThrowHandeler implements Listener {
         snowball.setInvisible(true);
         // Sound
         player.playSound(player.getLocation(), Sound.ENTITY_SNOWBALL_THROW, 1, 1);
+
+        new BukkitRunnable() {
+            float angle = 0f;
+
+            @Override
+            public void run() {
+                if (display.isDead() || !display.isValid() || snowball.isDead()) {
+                    cancel();
+                    return;
+                }
+
+                // Increase angle
+                angle += 10f; // degrees per tick
+                if (angle >= 360f) angle -= 360f;
+
+                // Rotate around X axis
+                display.setRotation(angle, 0);
+            }
+        }.runTaskTimer(plugin, 0L, 1L);
     }
 
     @EventHandler
