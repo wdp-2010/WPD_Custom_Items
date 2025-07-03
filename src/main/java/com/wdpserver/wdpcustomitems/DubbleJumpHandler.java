@@ -40,17 +40,17 @@ public class DubbleJumpHandler implements Listener {
         ItemStack boots = player.getInventory().getBoots();
         boolean hasBoots = isDoubleJumpBoots(boots);
         boolean onGround = player.isOnGround();
+        boolean wasGround = canDoubleJump.containsKey(uuid) && canDoubleJump.get(uuid) != null;
 
-        // If on the ground: reset state and disable flight
         if (onGround) {
+            // On ground: reset everything
             player.setAllowFlight(false);
             canDoubleJump.put(uuid, true);
             return;
         }
 
-        // If not on ground, and wearing boots, and hasn't used double jump yet
-        if (!onGround && hasBoots && !canDoubleJump.getOrDefault(uuid, false)) {
-            // Enable flight so pressing space will trigger the double jump
+        // If in air, and wearing boots, and still allowed to double jump
+        if (!onGround && hasBoots && canDoubleJump.getOrDefault(uuid, false)) {
             player.setAllowFlight(true);
         }
     }
@@ -66,14 +66,14 @@ public class DubbleJumpHandler implements Listener {
         boolean canJump = canDoubleJump.getOrDefault(uuid, false);
 
         if (hasBoots && canJump) {
-            event.setCancelled(true); // Cancel normal flight
-            player.setAllowFlight(false); // Disable flight so no further jumps
-            canDoubleJump.put(uuid, false); // Consume the double jump
+            event.setCancelled(true); // Cancel normal flying
+            player.setAllowFlight(false); // Disable flight immediately
+            canDoubleJump.put(uuid, false); // Mark that jump was used
 
-            // Apply boost
             Vector velocity = player.getLocation().getDirection().multiply(0.5);
             velocity.setY(1.0);
             player.setVelocity(velocity);
         }
     }
+
 }
