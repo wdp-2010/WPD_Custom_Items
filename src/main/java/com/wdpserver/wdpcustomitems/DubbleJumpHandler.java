@@ -41,15 +41,21 @@ public class DubbleJumpHandler implements Listener {
         boolean hasBoots = isDoubleJumpBoots(boots);
         boolean onGround = player.isOnGround();
 
-        if (hasBoots && onGround) {
-            // Allow flight to enable double jump detection
+        // If on the ground: reset state and disable flight
+        if (onGround) {
+            player.setAllowFlight(false);
+            canDoubleJump.put(uuid, false);
+            return;
+        }
+
+        // If not on ground, and wearing boots, and hasn't used double jump yet
+        if (!onGround && hasBoots && !canDoubleJump.getOrDefault(uuid, false)) {
+            // Enable flight so pressing space will trigger the double jump
             player.setAllowFlight(true);
             canDoubleJump.put(uuid, true);
-        } else if (!hasBoots || onGround == false) {
-            // Disable flight when not on ground or boots removed
-            player.setAllowFlight(false);
         }
     }
+
 
     @EventHandler
     public void onPlayerToggleFlight(PlayerToggleFlightEvent event) {
@@ -61,11 +67,11 @@ public class DubbleJumpHandler implements Listener {
         boolean canJump = canDoubleJump.getOrDefault(uuid, false);
 
         if (hasBoots && canJump) {
-            event.setCancelled(true); // Cancel normal flying
-            player.setAllowFlight(false); // Disable flight until next landing
-            canDoubleJump.put(uuid, false); // Use up the double jump
+            event.setCancelled(true); // Cancel normal flight
+            player.setAllowFlight(false); // Disable flight so no further jumps
+            canDoubleJump.put(uuid, false); // Consume the double jump
 
-            // Apply upward and forward boost
+            // Apply boost
             Vector velocity = player.getLocation().getDirection().multiply(0.5);
             velocity.setY(1.0);
             player.setVelocity(velocity);
