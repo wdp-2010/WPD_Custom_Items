@@ -134,8 +134,8 @@ public class WdpCustomItems extends JavaPlugin {
         ItemMeta meta = jumpBoots.getItemMeta();
 
         meta.getPersistentDataContainer().set(jumpBootsKey, PersistentDataType.BYTE, (byte) 1);
-        meta.setDisplayName("Dubble Jump Boots");
-        meta.setLore(Collections.singletonList("Jump on air ONCE"));
+        meta.setDisplayName("§bDubble Jump Boots");
+        meta.setLore(Arrays.asList("§fJump once on air","press space twice to dubble jump"));
 
         jumpBoots.setItemMeta(meta);
         return jumpBoots;
@@ -147,7 +147,7 @@ public class WdpCustomItems extends JavaPlugin {
         ItemMeta meta = bolt.getItemMeta();
         meta.setDisplayName("§bLightning Bolt");
         meta.getPersistentDataContainer().set(boltKey, PersistentDataType.BYTE, (byte) 1);
-        meta.setLore(Collections.singletonList("With this in your inventory, the Epic Sword spawn lightning."));
+        meta.setLore(Collections.singletonList("§fWith this in your inventory, the Epic Sword spawn lightning."));
         meta.setItemModel(new NamespacedKey("wdpserver","bolt"));
 
         bolt.setItemMeta(meta);
