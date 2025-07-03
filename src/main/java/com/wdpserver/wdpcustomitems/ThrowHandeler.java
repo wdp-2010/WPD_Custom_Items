@@ -1,6 +1,9 @@
 package com.wdpserver.wdpcustomitems;
 
-import org.bukkit.*;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -10,12 +13,9 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.scheduler.BukkitScheduler;
-import org.bukkit.util.Vector;
-import org.jetbrains.annotations.NotNull;
 
 public class ThrowHandeler implements Listener {
+
     private final WdpCustomItems plugin;
 
     public ThrowHandeler(WdpCustomItems plugin) {
@@ -27,82 +27,67 @@ public class ThrowHandeler implements Listener {
         Player player = event.getPlayer();
         Action action = event.getAction();
 
-        if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
-            ItemStack item = event.getItem();
-            ItemMeta meta = item.getItemMeta();
+        if (action != Action.RIGHT_CLICK_AIR && action != Action.RIGHT_CLICK_BLOCK) return;
 
-            if (item == null) return;
+        ItemStack item = event.getItem();
+        if (item == null || !item.hasItemMeta()) return;
 
-            if (!item.hasItemMeta()) return ;
+        ItemMeta meta = item.getItemMeta();
+        if (!meta.getPersistentDataContainer().has(plugin.throwStoneKey, PersistentDataType.BYTE)) return;
 
-            if (meta.getPersistentDataContainer().has(plugin.throwStoneKey, PersistentDataType.BYTE)) {
-                event.setCancelled(true);
+        event.setCancelled(true);
 
-                item.setAmount(item.getAmount() - 1);
-
-                ItemDisplay display = (ItemDisplay) player.getWorld().spawnEntity(player.getEyeLocation().add(player.getLocation().getDirection().multiply(0.5)),EntityType.ITEM_DISPLAY);
-
-                display.setItemStack(new ItemStack(Material.COBBLESTONE));
-                display.setInterpolationDelay(0);
-                display.setInterpolationDuration(0);
-
-                display.getPersistentDataContainer().set(plugin.throwStoneKey, PersistentDataType.BYTE, (byte)1);
-
-                Vector velocity = player.getLocation().getDirection().normalize().multiply(1.5);
-                display.setVelocity(velocity);
-
-                player.playSound(player.getLocation(), Sound.ENTITY_SNOWBALL_THROW, 1, 1);
-
-                BukkitScheduler scheduler = Bukkit.getScheduler();
-
-                // After spawning the display:
-                scheduler.runTaskTimer(plugin, new Runnable() {
-                    int ticksLived = 0;
-                    ItemDisplay displayRef = display;
-                    Vector velocityRef = velocity;
-
-                    @Override
-                    public void run() {
-                        if (displayRef.isDead() || !displayRef.isValid()) {
-                            cancel();
-                            return;
-                        }
-
-                        // Move it manually
-                        Location currentLoc = displayRef.getLocation();
-                        currentLoc.add(velocityRef);
-                        displayRef.teleport(currentLoc);
-
-                        // Detect nearby entities to "hit"
-                        for (Entity nearby : currentLoc.getWorld().getNearbyEntities(currentLoc, 0.5, 0.5, 0.5)) {
-                            if (nearby instanceof LivingEntity && !(nearby instanceof Player && ((Player)nearby).getUniqueId().equals(player.getUniqueId()))) {
-                                LivingEntity target = (LivingEntity) nearby;
-                                target.damage(4.0, player);
-                                target.getWorld().playSound(target.getLocation(), Sound.ENTITY_PLAYER_HURT, 1, 1);
-
-                                // Remove display
-                                displayRef.remove();
-                                cancel();
-                                return;
-                            }
-                        }
-
-                        // Remove after 3 seconds
-                        ticksLived++;
-                        if (ticksLived > 60) {
-                            displayRef.remove();
-                            cancel();
-                        }
-                    }
-
-                    private void cancel() {
-                        // This method is a placeholder to exit the task
-                        // In actual code, you call BukkitRunnable.cancel()
-                    }
-                }, 0L, 1L);
-
-            }
+        // Consume item
+        if (item.getAmount() > 1) {
+            item.setAmount(item.getAmount() - 1);
+        } else {
+            player.getInventory().removeItem(item);
         }
+
+        // Launch snowball
+        Snowball snowball = player.launchProjectile(Snowball.class);
+        snowball.setVelocity(player.getLocation().getDirection().normalize().multiply(1.5));
+
+        // Tag the snowball
+        snowball.getPersistentDataContainer().set(plugin.throwStoneKey, PersistentDataType.BYTE, (byte) 1);
+
+        // Spawn ItemDisplay and attach
+        ItemDisplay display = (ItemDisplay) player.getWorld().spawnEntity(
+                player.getEyeLocation().add(player.getLocation().getDirection().multiply(0.5)),
+                EntityType.ITEM_DISPLAY
+        );
+        display.setItemStack(new ItemStack(Material.COBBLESTONE));
+        display.setInterpolationDuration(0);
+        display.setInterpolationDelay(0);
+
+        // Attach cobble to the snowball
+        snowball.addPassenger(display);
+
+        // Sound
+        player.playSound(player.getLocation(), Sound.ENTITY_SNOWBALL_THROW, 1, 1);
+    }
+
+    @EventHandler
+    public void onProjectileHit(ProjectileHitEvent event) {
+        if (!(event.getEntity() instanceof Snowball)) return;
+
+        Snowball snowball = (Snowball) event.getEntity();
+
+        if (!snowball.getPersistentDataContainer().has(plugin.throwStoneKey, PersistentDataType.BYTE)) return;
+
+        // Damage entity if hit
+        if (event.getHitEntity() instanceof LivingEntity) {
+            LivingEntity target = (LivingEntity) event.getHitEntity();
+            target.damage(4.0, (Entity) snowball.getShooter());
+            target.getWorld().playSound(target.getLocation(), Sound.ENTITY_PLAYER_HURT, 1, 1);
+        }
+
+        // Remove cobblestone display
+        for (Entity passenger : snowball.getPassengers()) {
+            passenger.remove();
+        }
+
+        // Add particles
+        snowball.getWorld().spawnParticle(Particle.CRIT, snowball.getLocation(), 10);
     }
 }
-
