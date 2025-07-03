@@ -1,15 +1,13 @@
 package com.wdpserver.wdpcustomitems;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Vector;
 
@@ -19,9 +17,7 @@ import java.util.UUID;
 
 public class DubbleJumpHandler implements Listener {
 
-    private final Map<UUID, Boolean> wasOnGround = new HashMap<>();
     private final Map<UUID, Boolean> canDoubleJump = new HashMap<>();
-    private final Map<UUID, Double> lastYVelocity = new HashMap<>();
 
     private final WdpCustomItems plugin;
 
@@ -29,10 +25,6 @@ public class DubbleJumpHandler implements Listener {
         this.plugin = plugin;
     }
 
-
-    /**
-     * Helper to check if boots have the PersistentData key.
-     */
     private boolean isDoubleJumpBoots(ItemStack boots) {
         if (boots == null || boots.getType() == Material.AIR) return false;
         ItemMeta meta = boots.getItemMeta();
@@ -41,43 +33,42 @@ public class DubbleJumpHandler implements Listener {
     }
 
     @EventHandler
-    public void onPlayerMove(PlayerMoveEvent e) {
-        Player p = e.getPlayer();
+    public void onPlayerMove(PlayerMoveEvent event) {
+        Player player = event.getPlayer();
+        UUID uuid = player.getUniqueId();
 
-        ItemStack boots = p.getInventory().getBoots();
+        ItemStack boots = player.getInventory().getBoots();
         boolean hasBoots = isDoubleJumpBoots(boots);
+        boolean onGround = player.isOnGround();
 
-        UUID uuid = p.getUniqueId();
-        boolean onGround = p.isOnGround();
-        boolean wasGroundBefore = wasOnGround.getOrDefault(uuid, true);
-        double currentY = p.getVelocity().getY();
-        double lastY = lastYVelocity.getOrDefault(uuid, 0.0);
-
-        // 1. If player just left ground
-        if (wasGroundBefore && !onGround && hasBoots) {
+        if (hasBoots && onGround) {
+            // Allow flight to enable double jump detection
+            player.setAllowFlight(true);
             canDoubleJump.put(uuid, true);
-            p.sendMessage("you have double jump boots");
+        } else if (!hasBoots || onGround == false) {
+            // Disable flight when not on ground or boots removed
+            player.setAllowFlight(false);
         }
+    }
 
-        // 2. If player landed, reset
-        if (onGround) {
-            canDoubleJump.put(uuid, false);
+    @EventHandler
+    public void onPlayerToggleFlight(PlayerToggleFlightEvent event) {
+        Player player = event.getPlayer();
+        UUID uuid = player.getUniqueId();
+
+        ItemStack boots = player.getInventory().getBoots();
+        boolean hasBoots = isDoubleJumpBoots(boots);
+        boolean canJump = canDoubleJump.getOrDefault(uuid, false);
+
+        if (hasBoots && canJump) {
+            event.setCancelled(true); // Cancel normal flying
+            player.setAllowFlight(false); // Disable flight until next landing
+            canDoubleJump.put(uuid, false); // Use up the double jump
+
+            // Apply upward and forward boost
+            Vector velocity = player.getLocation().getDirection().multiply(0.5);
+            velocity.setY(1.0);
+            player.setVelocity(velocity);
         }
-
-        // 3. Detect midair jump input via Y velocity increase
-        if (!onGround && hasBoots && canDoubleJump.getOrDefault(uuid, false)) {
-            if (currentY - lastY > 0.2) {
-                // Apply double jump boost
-                Vector v = p.getLocation().getDirection().multiply(0.5);
-                v.setY(1.0);
-                p.setVelocity(v);
-
-                canDoubleJump.put(uuid, false);
-            }
-        }
-
-        // Update tracking
-        wasOnGround.put(uuid, onGround);
-        lastYVelocity.put(uuid, currentY);
     }
 }
