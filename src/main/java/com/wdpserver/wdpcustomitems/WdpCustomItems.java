@@ -63,6 +63,7 @@ public class WdpCustomItems extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new BeamHandler(this), this);
         getServer().getPluginManager().registerEvents(new RecolorCraftHandler(this), this);
         getServer().getPluginManager().registerEvents(new ThrowHandeler(this), this);
+        getServer().getPluginManager().registerEvents(new DubbleJumpHandler(this), this);
 
 
         Objects.requireNonNull(getCommand("givesword")).setExecutor(new GiveSwordCommand(this));
