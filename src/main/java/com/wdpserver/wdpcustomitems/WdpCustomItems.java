@@ -214,7 +214,7 @@ public class WdpCustomItems extends JavaPlugin {
     public void registerJumpBootsRecipe() {
         ItemStack result = createJumpBoots();
 
-        ShapedRecipe recipe = new ShapedRecipe(new NamespacedKey(this, "throw_stone"), result);
+        ShapedRecipe recipe = new ShapedRecipe(new NamespacedKey(this, "jumpboots"), result);
 
         recipe.shape(
                 "   ",
