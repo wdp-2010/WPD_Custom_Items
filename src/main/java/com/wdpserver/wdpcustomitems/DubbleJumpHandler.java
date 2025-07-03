@@ -44,7 +44,7 @@ public class DubbleJumpHandler implements Listener {
         // If on the ground: reset state and disable flight
         if (onGround) {
             player.setAllowFlight(false);
-            canDoubleJump.put(uuid, false);
+            canDoubleJump.put(uuid, true);
             return;
         }
 
@@ -52,7 +52,6 @@ public class DubbleJumpHandler implements Listener {
         if (!onGround && hasBoots && !canDoubleJump.getOrDefault(uuid, false)) {
             // Enable flight so pressing space will trigger the double jump
             player.setAllowFlight(true);
-            canDoubleJump.put(uuid, true);
         }
     }
 
