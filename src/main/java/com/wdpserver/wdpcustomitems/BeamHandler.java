@@ -47,6 +47,7 @@ public class BeamHandler implements Listener {
         if (plugin.cooldowns.containsKey(playerId)) {
             long last = plugin.cooldowns.get(playerId);
             long elapsed = now - last;
+
             if (elapsed < cooldownTimeMs) {
                 long secondsLeft = (cooldownTimeMs - elapsed) / 1000;
 
@@ -90,8 +91,10 @@ public class BeamHandler implements Listener {
 
             @Override
             public void run() {
+
                 if (i >= particles || hitBlock) {
                     if (!hasHitEntitie) cooldownTimeMs =  1000;
+
                     cancel();
                     return;
                 }
@@ -111,6 +114,7 @@ public class BeamHandler implements Listener {
                             target.setVelocity(direction.clone().multiply(beamSword.knockback));
                         }
 
+                        hasHitEntitie = true;
                         cooldownTimeMs = 5000;
 
                         target.damage(beamSword.damage, player);
