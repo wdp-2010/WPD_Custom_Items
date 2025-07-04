@@ -66,17 +66,6 @@ public class ThrowHandeler implements Listener {
         snowball.setInvisible(true);
         // Sound
         player.playSound(player.getLocation(), Sound.ENTITY_SNOWBALL_THROW, 1, 1);
-
-        new BukkitRunnable() {
-
-            @Override
-            public void run() {
-                if (display.isDead() || !display.isValid() || snowball.isDead()) {
-                    cancel();
-                    return;
-                }
-            }
-        }.runTaskTimer(plugin, 0L, 1L);
     }
 
     @EventHandler
