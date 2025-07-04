@@ -131,6 +131,7 @@ public class BeamHandler implements Listener {
                 plugin.hasBeam.put(playerId, true);
 
                 if (point.getBlock().getType().isSolid()) {
+                    if (!hasHitEntitie) cooldownTimeMs =  1000;
                     hitBlock = true;
                     plugin.hasBeam.remove(playerId);
                     cancel();
