@@ -154,9 +154,9 @@ public class WdpCustomItems extends JavaPlugin {
 
         ShapedRecipe recipe = new ShapedRecipe(boltKey, bolt);
         recipe.shape(
-                " D ",
-                "DND",
-                " D "
+                "  D" ,
+                " N ",
+                "D  "
         );
         recipe.setIngredient('D', Material.DIAMOND);
         recipe.setIngredient('N', Material.NETHER_STAR);
