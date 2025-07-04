@@ -23,6 +23,7 @@ public class WdpCustomItems extends JavaPlugin {
     public NamespacedKey throwStoneKey;
     public NamespacedKey jumpBootsKey;
 
+    public final Map<UUID, Boolean> hasBeam = new HashMap<>();
     public final Map<UUID, Long> cooldowns = new HashMap<>();
     public final Map<UUID, BossBar> cooldownBars = new HashMap<>();
     public final Map<UUID, BossBar> readyBars = new HashMap<>();

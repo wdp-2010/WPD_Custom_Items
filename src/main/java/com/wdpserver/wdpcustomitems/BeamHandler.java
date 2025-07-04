@@ -61,6 +61,11 @@ public class BeamHandler implements Listener {
             }
         }
 
+        if (plugin.hasBeam.containsKey(playerId)) {
+            player.sendMessage("You have a beam, you must wait a moment");
+            return;
+        }
+
         plugin.cooldowns.put(playerId, now);
 
         BossBar cooldownBar = Bukkit.createBossBar(
@@ -94,6 +99,7 @@ public class BeamHandler implements Listener {
 
                 if (i >= particles || hitBlock) {
                     if (!hasHitEntitie) cooldownTimeMs =  1000;
+                    plugin.hasBeam.remove(playerId);
 
                     cancel();
                     return;
@@ -121,6 +127,7 @@ public class BeamHandler implements Listener {
 
                     }
                 }
+                plugin.hasBeam.put(playerId, true);
 
                 if (point.getBlock().getType().isSolid()) {
                     hitBlock = true;
