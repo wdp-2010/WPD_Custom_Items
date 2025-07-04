@@ -43,13 +43,13 @@ public class DubbleJumpHandler implements Listener {
         boolean wasGround = canDoubleJump.containsKey(uuid) && canDoubleJump.get(uuid) != null;
 
         if (onGround) {
-            // On ground: reset everything
+            // On the ground: reset everything
             player.setAllowFlight(false);
             canDoubleJump.put(uuid, true);
             return;
         }
 
-        // If in air, and wearing boots, and still allowed to double jump
+        // If in the air, and wearing boots, and still allowed to double jump
         if (!onGround && hasBoots && canDoubleJump.getOrDefault(uuid, false)) {
             player.setAllowFlight(true);
         }
