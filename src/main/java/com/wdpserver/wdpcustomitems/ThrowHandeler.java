@@ -68,7 +68,6 @@ public class ThrowHandeler implements Listener {
         player.playSound(player.getLocation(), Sound.ENTITY_SNOWBALL_THROW, 1, 1);
 
         new BukkitRunnable() {
-            float angle = 0f;
 
             @Override
             public void run() {
@@ -76,13 +75,6 @@ public class ThrowHandeler implements Listener {
                     cancel();
                     return;
                 }
-
-                // Increase angle
-                angle += 10f; // degrees per tick
-                if (angle >= 360f) angle -= 360f;
-
-                // Rotate around X axis
-                display.setRotation(angle, 0);
             }
         }.runTaskTimer(plugin, 0L, 1L);
     }
