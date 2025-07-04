@@ -122,6 +122,7 @@ public class BeamHandler implements Listener {
 
                         hasHitEntitie = true;
                         cooldownTimeMs = 5000;
+                        plugin.hasBeam.remove(playerId);
 
                         target.damage(beamSword.damage, player);
 
@@ -131,6 +132,7 @@ public class BeamHandler implements Listener {
 
                 if (point.getBlock().getType().isSolid()) {
                     hitBlock = true;
+                    plugin.hasBeam.remove(playerId);
                     cancel();
                     return;
                 }
