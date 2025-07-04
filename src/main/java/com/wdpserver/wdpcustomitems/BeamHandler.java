@@ -18,11 +18,15 @@ import static org.bukkit.ChatColor.*;
 
 public class BeamHandler implements Listener {
 
-    private final WdpCustomItems plugin;
+
+    private WdpCustomItems plugin;
 
     public BeamHandler(WdpCustomItems plugin) {
         this.plugin = plugin;
+        cooldownTimeMs = plugin.defCooldownTimeMs;
     }
+
+    long cooldownTimeMs;
 
     @EventHandler
     public void onRightClick(PlayerInteractEvent event) {
@@ -39,11 +43,12 @@ public class BeamHandler implements Listener {
         if (readyBar != null) readyBar.removeAll();
 
         long now = System.currentTimeMillis();
+
         if (plugin.cooldowns.containsKey(playerId)) {
             long last = plugin.cooldowns.get(playerId);
             long elapsed = now - last;
-            if (elapsed < plugin.cooldownTimeMs) {
-                long secondsLeft = (plugin.cooldownTimeMs - elapsed) / 1000;
+            if (elapsed < cooldownTimeMs) {
+                long secondsLeft = (cooldownTimeMs - elapsed) / 1000;
 
                 BossBar cooldownBar = plugin.cooldownBars.get(playerId);
                 if (cooldownBar != null && !cooldownBar.getPlayers().contains(player)) {
@@ -80,11 +85,13 @@ public class BeamHandler implements Listener {
         new BukkitRunnable() {
             int i = 0;
             boolean hitBlock = false;
+            boolean hasHitEntitie = false;
             final Set<UUID> hitEntities = new HashSet<>();
 
             @Override
             public void run() {
                 if (i >= particles || hitBlock) {
+                    if (!hasHitEntitie) cooldownTimeMs =  1000;
                     cancel();
                     return;
                 }
@@ -103,6 +110,8 @@ public class BeamHandler implements Listener {
                         } else {
                             target.setVelocity(direction.clone().multiply(beamSword.knockback));
                         }
+
+                        cooldownTimeMs = 5000;
 
                         target.damage(beamSword.damage, player);
 
@@ -137,7 +146,7 @@ public class BeamHandler implements Listener {
             @Override
             public void run() {
                 long elapsed = System.currentTimeMillis() - now;
-                if (elapsed >= plugin.cooldownTimeMs) {
+                if (elapsed >= cooldownTimeMs) {
                     cooldownBar.removeAll();
                     plugin.cooldownBars.remove(playerId);
 
@@ -151,7 +160,7 @@ public class BeamHandler implements Listener {
                     cancel();
                     return;
                 }
-                double progress = 1.0 - ((double) elapsed / plugin.cooldownTimeMs);
+                double progress = 1.0 - ((double) elapsed / cooldownTimeMs);
                 cooldownBar.setProgress(progress);
             }
         }.runTaskTimer(plugin, 0L, 2L);

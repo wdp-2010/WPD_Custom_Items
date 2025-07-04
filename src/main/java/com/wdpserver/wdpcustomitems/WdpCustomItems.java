@@ -27,7 +27,7 @@ public class WdpCustomItems extends JavaPlugin {
     public final Map<UUID, BossBar> cooldownBars = new HashMap<>();
     public final Map<UUID, BossBar> readyBars = new HashMap<>();
 
-    public long cooldownTimeMs;
+    public long defCooldownTimeMs;
 
     @Override
     public void onEnable() {
@@ -51,7 +51,7 @@ public class WdpCustomItems extends JavaPlugin {
         throwStoneKey = new NamespacedKey(this, "throwstone");
         jumpBootsKey = new NamespacedKey(this, "dubllejumpboots");
 
-        cooldownTimeMs = (long) (getConfig().getDouble("cooldown", 5.0) * 1000);
+        defCooldownTimeMs = (long) (getConfig().getDouble("cooldown", 5.0) * 1000);
 
         // Register the recipe here
         registerBoltRecipe();
@@ -82,7 +82,7 @@ public class WdpCustomItems extends JavaPlugin {
         getLogger().info("WDP Custom Items disabled.");
     }
 
-    public ItemStack createCustomBeamSword(int damage, String color, double knockback) {
+    public ItemStack createCustomBeamSword(int damage, String color, double knockback, long cooldown) {
         ItemStack sword = new ItemStack(Material.DIAMOND_SWORD);
         ItemMeta meta = sword.getItemMeta();
 
@@ -164,7 +164,7 @@ public class WdpCustomItems extends JavaPlugin {
         getServer().addRecipe(recipe);
     }
     public void registerBeamSwordRecipe() {
-        ItemStack result = createCustomBeamSword(getConfig().getInt("beam-damage", 5), "RED", getConfig().getDouble("knockback", 1.5));  //  config
+        ItemStack result = createCustomBeamSword(getConfig().getInt("beam-damage", 10), "RED", getConfig().getDouble("knockback", 1.5), getConfig().getLong("knockback", 3));  //  config
         ItemStack beamStone = createBeamStone();
         ShapedRecipe recipe = new ShapedRecipe(new NamespacedKey(this, "beam_sword"), result);
 
