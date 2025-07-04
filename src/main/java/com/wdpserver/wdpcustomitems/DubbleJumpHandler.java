@@ -1,9 +1,11 @@
 package com.wdpserver.wdpcustomitems;
 
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.inventory.ItemStack;
@@ -37,6 +39,8 @@ public class DubbleJumpHandler implements Listener {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
 
+        if (player.getGameMode().equals(GameMode.CREATIVE)) return;
+
         ItemStack boots = player.getInventory().getBoots();
         boolean hasBoots = isDoubleJumpBoots(boots);
         boolean onGround = player.isOnGround();
@@ -54,6 +58,12 @@ public class DubbleJumpHandler implements Listener {
             player.setAllowFlight(true);
         }
     }
+    @EventHandler
+    public void onPlayerCreative(PlayerGameModeChangeEvent event) {
+        Player player = event.getPlayer();
+        if (player.getGameMode().equals(GameMode.CREATIVE)) player.setAllowFlight(true);
+
+    }
 
 
     @EventHandler
@@ -64,6 +74,8 @@ public class DubbleJumpHandler implements Listener {
         ItemStack boots = player.getInventory().getBoots();
         boolean hasBoots = isDoubleJumpBoots(boots);
         boolean canJump = canDoubleJump.getOrDefault(uuid, false);
+
+        if (player.getGameMode().equals(GameMode.CREATIVE)) return;
 
         if (hasBoots && canJump) {
             event.setCancelled(true); // Cancel normal flying
