@@ -80,7 +80,7 @@ public class BeamHandler implements Listener {
 
         boolean hasBolt = Arrays.stream(player.getInventory().getContents()).anyMatch(this::isBolt);
 
-        int particles = 100;
+        int particles = 50;
         double step = maxDistance / particles;
 
         new BukkitRunnable() {
