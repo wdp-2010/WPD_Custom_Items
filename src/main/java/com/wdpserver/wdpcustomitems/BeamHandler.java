@@ -23,7 +23,7 @@ public class BeamHandler implements Listener {
 
     public BeamHandler(WdpCustomItems plugin) {
         this.plugin = plugin;
-        cooldownTimeMs = plugin.defCooldownTimeMs;
+        cooldownTimeMs = plugin.longCooldownTimeMs;
     }
 
     long cooldownTimeMs;
@@ -49,7 +49,7 @@ public class BeamHandler implements Listener {
             long elapsed = now - last;
 
             if (elapsed < cooldownTimeMs) {
-                long secondsLeft = (cooldownTimeMs - elapsed) / 1000;
+                long secondsLeft = ((cooldownTimeMs - elapsed) / 1000) + 1;
 
                 BossBar cooldownBar = plugin.cooldownBars.get(playerId);
                 if (cooldownBar != null && !cooldownBar.getPlayers().contains(player)) {
@@ -98,7 +98,7 @@ public class BeamHandler implements Listener {
             public void run() {
 
                 if (i >= particles || hitBlock) {
-                    if (!hasHitEntitie) cooldownTimeMs =  1000;
+                    if (!hasHitEntitie) cooldownTimeMs =  plugin.shortCooldownTimeMs;
                     plugin.hasBeam.remove(playerId);
 
                     cancel();
@@ -121,7 +121,7 @@ public class BeamHandler implements Listener {
                         }
 
                         hasHitEntitie = true;
-                        cooldownTimeMs = 5000;
+                        cooldownTimeMs = plugin.longCooldownTimeMs;
                         plugin.hasBeam.remove(playerId);
 
                         target.damage(beamSword.damage, player);
@@ -131,7 +131,7 @@ public class BeamHandler implements Listener {
                 plugin.hasBeam.put(playerId, true);
 
                 if (point.getBlock().getType().isSolid()) {
-                    if (!hasHitEntitie) cooldownTimeMs =  1000;
+                    if (!hasHitEntitie) cooldownTimeMs = plugin.shortCooldownTimeMs;
                     hitBlock = true;
                     plugin.hasBeam.remove(playerId);
                     cancel();

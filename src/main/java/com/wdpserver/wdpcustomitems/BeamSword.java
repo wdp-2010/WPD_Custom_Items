@@ -10,7 +10,6 @@ public class BeamSword {
     public int damage;
     public Color color;
     public double knockback;
-    public long cooldown;
 
     public BeamSword(ItemStack item, WdpCustomItems plugin) {
         ItemMeta meta = item.getItemMeta();

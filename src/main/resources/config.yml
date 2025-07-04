@@ -1,11 +1,12 @@
 # WDP Custom Items Config
 
-beam-damage: 5
+beam-damage: 15
 
 knockback: 3
 
 # Cooldown in seconds between beam shots
 cooldown: 5.0
+short-cooldown: 1.0
 
 # How many ticks between each particle step of the beam
 beam-speed: 1
