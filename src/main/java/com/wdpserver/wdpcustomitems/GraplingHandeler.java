@@ -1,5 +1,6 @@
 package com.wdpserver.wdpcustomitems;
 
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.entity.Entity;
@@ -41,6 +42,7 @@ public class GraplingHandeler implements Listener {
             public void run() {
                 // Cancel if player moved more than 0.1 blocks away from initial location
                 if (player.getLocation().distanceSquared(initialLocation) > 0.01) {
+                    player.sendMessage(Color.RED + "You moved, Grappling Hook canceled");
                     cancel();
                     return;
                 }
