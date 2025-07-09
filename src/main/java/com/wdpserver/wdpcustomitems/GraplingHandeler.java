@@ -97,7 +97,8 @@ public class GraplingHandeler implements Listener {
                 for (int i = 0; i < count; i++) {
                     Location particleLoc = from.clone().add(unit.clone().multiply(i * gap));
                     particleLoc.getWorld().spawnParticle(Particle.END_ROD, particleLoc, 1, 0, 0, 0, 0);
-                    particleLoc.getWorld().spawnParticle(Particle.WITCH, particleLoc, 1, 0, 0, 0, 0.02);
+                    particleLoc.getWorld().spawnParticle(Particle.WITCH, particleLoc, 1, 0, 0, 0, 0.01);
+                    particleLoc.getWorld().spawnParticle(Particle.CRIT, particleLoc, 2, 0, 0,0,0);
                 }
             }
         }.runTaskTimer(plugin, 0L, 2L);
