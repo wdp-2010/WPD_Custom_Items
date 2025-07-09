@@ -7,6 +7,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemHeldEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
@@ -27,14 +30,15 @@ public class GraplingHandeler implements Listener {
 
     public GraplingHandeler(WdpCustomItems plugin) {
         this.plugin = plugin;
-        this.grapplingCooldownTimeMs = plugin.longCooldownTimeMs; // Use separate config if needed
+        this.grapplingCooldownTimeMs = plugin.longCooldownTimeMsGrappling; // Use separate config if needed
     }
 
     @EventHandler
     public void onRightClickTrident(PlayerInteractEvent event) {
         if (event.getItem() == null || event.getItem().getType() != Material.TRIDENT) return;
         if (!(event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) return;
-        if (!event.getItem().getItemMeta().getPersistentDataContainer().has(plugin.grapplingKey, PersistentDataType.BYTE)) return;
+        if (!event.getItem().getItemMeta().getPersistentDataContainer().has(plugin.grapplingKey, PersistentDataType.BYTE))
+            return;
 
         Player player = event.getPlayer();
         UUID playerId = player.getUniqueId();
@@ -173,4 +177,34 @@ public class GraplingHandeler implements Listener {
             }
         }.runTaskTimer(plugin, 0L, 2L);
     }
+    @EventHandler
+    public void onItemSwitch(PlayerItemHeldEvent event) {
+        Player player = event.getPlayer();
+        UUID playerId = player.getUniqueId();
+
+        ItemStack newItem = player.getInventory().getItem(event.getNewSlot());
+        boolean holdingGrappling = false;
+
+        if (newItem != null && newItem.getType() == Material.TRIDENT && newItem.hasItemMeta()) {
+            ItemMeta meta = newItem.getItemMeta();
+            if (meta.getPersistentDataContainer().has(plugin.grapplingKey, PersistentDataType.BYTE)) {
+                holdingGrappling = true;
+            }
+        }
+
+        if (!holdingGrappling) {
+            BossBar cooldownBar = grapplingCooldownBars.get(playerId);
+            if (cooldownBar != null) cooldownBar.removePlayer(player);
+
+            BossBar readyBar = grapplingReadyBars.get(playerId);
+            if (readyBar != null) readyBar.removePlayer(player);
+        } else {
+            BossBar cooldownBar = grapplingCooldownBars.get(playerId);
+            if (cooldownBar != null) cooldownBar.addPlayer(player);
+
+            BossBar readyBar = grapplingReadyBars.get(playerId);
+            if (readyBar != null) readyBar.addPlayer(player);
+        }
+    }
+
 }
