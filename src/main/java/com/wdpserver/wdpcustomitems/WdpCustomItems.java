@@ -151,8 +151,8 @@ public class WdpCustomItems extends JavaPlugin {
         ItemMeta meta = jumpBoots.getItemMeta();
 
         meta.getPersistentDataContainer().set(grapplingKey, PersistentDataType.BYTE, (byte) 1);
-        meta.setDisplayName("§bDubble Jump Boots");
-        meta.setLore(Arrays.asList("§fJump once on air","§fpress space twice to dubble jump"));
+        meta.setDisplayName("§bGrappling Hook");
+        meta.setLore(Collections.singletonList("§fGrab an entity"));
 
         jumpBoots.setItemMeta(meta);
         return jumpBoots;
