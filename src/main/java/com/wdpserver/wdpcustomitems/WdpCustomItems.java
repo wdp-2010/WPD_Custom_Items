@@ -22,6 +22,7 @@ public class WdpCustomItems extends JavaPlugin {
     public NamespacedKey beamStoneKey;
     public NamespacedKey throwStoneKey;
     public NamespacedKey jumpBootsKey;
+    public NamespacedKey grapplingKey;
 
     public final Map<UUID, Boolean> hasBeam = new HashMap<>();
     public final Map<UUID, Long> cooldowns = new HashMap<>();
@@ -51,7 +52,8 @@ public class WdpCustomItems extends JavaPlugin {
         beamKnockbackKey = new NamespacedKey(this, "beam_knockback");
         beamStoneKey = new NamespacedKey(this, "beamstone");
         throwStoneKey = new NamespacedKey(this, "throwstone");
-        jumpBootsKey = new NamespacedKey(this, "dubllejumpboots");
+        jumpBootsKey = new NamespacedKey(this, "dubleljumpboots");
+        grapplingKey = new NamespacedKey(this, "grapplinghook");
 
         longCooldownTimeMs = (long) (getConfig().getDouble("cooldown", 5.0) * 1000);
         shortCooldownTimeMs = (long) (getConfig().getDouble("short-cooldown", 2.0) * 1000);
@@ -60,8 +62,9 @@ public class WdpCustomItems extends JavaPlugin {
         registerBoltRecipe();
         registerBeamSwordRecipe();
         registerBeamStoneRecipe();
-        registerThrowStonerecipe();
+        registerThrowStoneRecipe();
         registerJumpBootsRecipe();
+        registerGrapplingHookRecipe();
 
         getServer().getPluginManager().registerEvents(new BeamHandler(this), this);
         getServer().getPluginManager().registerEvents(new RecolorCraftHandler(this), this);
@@ -143,6 +146,17 @@ public class WdpCustomItems extends JavaPlugin {
         jumpBoots.setItemMeta(meta);
         return jumpBoots;
     }
+    public ItemStack createGrapplingHook() {
+        ItemStack jumpBoots = new ItemStack(Material.TRIDENT);
+        ItemMeta meta = jumpBoots.getItemMeta();
+
+        meta.getPersistentDataContainer().set(grapplingKey, PersistentDataType.BYTE, (byte) 1);
+        meta.setDisplayName("§bDubble Jump Boots");
+        meta.setLore(Arrays.asList("§fJump once on air","§fpress space twice to dubble jump"));
+
+        jumpBoots.setItemMeta(meta);
+        return jumpBoots;
+    }
 
 
     private void registerBoltRecipe() {
@@ -184,6 +198,7 @@ public class WdpCustomItems extends JavaPlugin {
 
         getServer().addRecipe(recipe);
     }
+
     public void registerBeamStoneRecipe() {
         ItemStack result = createBeamStone();
 
@@ -202,7 +217,7 @@ public class WdpCustomItems extends JavaPlugin {
 
         getServer().addRecipe(recipe);
     }
-    public void registerThrowStonerecipe() {
+    public void registerThrowStoneRecipe() {
         ItemStack result = createThrowRock();
         result.setAmount(9);
 
@@ -231,6 +246,22 @@ public class WdpCustomItems extends JavaPlugin {
 
         recipe.setIngredient('I', Material.IRON_INGOT);
         recipe.setIngredient('W', Material.WIND_CHARGE);
+
+        getServer().addRecipe(recipe);
+    }
+    public void registerGrapplingHookRecipe() {
+        ItemStack result = createGrapplingHook();
+
+        ShapedRecipe recipe = new ShapedRecipe(new NamespacedKey(this, "grapplinghook"), result);
+
+        recipe.shape(
+                " T ",
+                " F ",
+                "   "
+        );
+
+        recipe.setIngredient('T', Material.TRIDENT);
+        recipe.setIngredient('F', Material.FISHING_ROD);
 
         getServer().addRecipe(recipe);
     }

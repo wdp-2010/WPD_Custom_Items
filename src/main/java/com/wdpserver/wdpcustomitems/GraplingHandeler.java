@@ -1,36 +1,78 @@
 package com.wdpserver.wdpcustomitems;
 
-import org.bukkit.Color;
-import org.bukkit.Location;
-import org.bukkit.Particle;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
+import org.bukkit.*;
+import org.bukkit.boss.*;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
+import java.util.*;
+
+import static org.bukkit.ChatColor.*;
+
 public class GraplingHandeler implements Listener {
 
-    private final Plugin plugin;
+    private final WdpCustomItems plugin;
+    private final long grapplingCooldownTimeMs;
 
-    public GraplingHandeler(Plugin plugin) {
+    // Independent cooldown and bar tracking
+    private final Map<UUID, Long> grapplingCooldowns = new HashMap<>();
+    private final Map<UUID, BossBar> grapplingCooldownBars = new HashMap<>();
+    private final Map<UUID, BossBar> grapplingReadyBars = new HashMap<>();
+
+    public GraplingHandeler(WdpCustomItems plugin) {
         this.plugin = plugin;
+        this.grapplingCooldownTimeMs = plugin.longCooldownTimeMs; // Use separate config if needed
     }
 
     @EventHandler
     public void onRightClickTrident(PlayerInteractEvent event) {
-        if (event.getItem() == null || event.getItem().getType() != org.bukkit.Material.TRIDENT) return;
+        if (event.getItem() == null || event.getItem().getType() != Material.TRIDENT) return;
         if (!(event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) return;
+        if (!event.getItem().getItemMeta().getPersistentDataContainer().has(plugin.grapplingKey, PersistentDataType.BYTE)) return;
 
         Player player = event.getPlayer();
-        Vector direction = player.getLocation().getDirection().normalize();
+        UUID playerId = player.getUniqueId();
 
-        // Save initial player location to detect movement
+        // Remove ready bar
+        BossBar readyBar = grapplingReadyBars.remove(playerId);
+        if (readyBar != null) readyBar.removeAll();
+
+        long now = System.currentTimeMillis();
+
+        if (grapplingCooldowns.containsKey(playerId)) {
+            long last = grapplingCooldowns.get(playerId);
+            long elapsed = now - last;
+
+            if (elapsed < grapplingCooldownTimeMs) {
+                long secondsLeft = ((grapplingCooldownTimeMs - elapsed) / 1000) + 1;
+
+                BossBar cooldownBar = grapplingCooldownBars.get(playerId);
+                if (cooldownBar != null && !cooldownBar.getPlayers().contains(player)) {
+                    cooldownBar.addPlayer(player);
+                }
+
+                player.sendMessage(RED + "Grappling Hook Cooldown: " + secondsLeft + "s remaining.");
+                return;
+            }
+        }
+
+        grapplingCooldowns.put(playerId, now);
+
+        BossBar cooldownBar = Bukkit.createBossBar(
+                RED + "GRAPPLING COOLDOWN",
+                BarColor.RED,
+                BarStyle.SEGMENTED_10
+        );
+        grapplingCooldownBars.put(playerId, cooldownBar);
+        cooldownBar.addPlayer(player);
+
+        Vector direction = player.getLocation().getDirection().normalize();
         Location initialLocation = player.getLocation().clone();
 
         new BukkitRunnable() {
@@ -40,30 +82,23 @@ public class GraplingHandeler implements Listener {
 
             @Override
             public void run() {
-                // Cancel if player moved more than 0.1 blocks away from initial location
                 if (player.getLocation().distanceSquared(initialLocation) > 0.01) {
-                    player.sendMessage(Color.RED + "You moved, Grappling Hook canceled");
+                    player.sendMessage(RED + "You moved, Grappling Hook canceled.");
                     cancel();
                     return;
                 }
 
                 Location playerFeet = player.getEyeLocation().clone().subtract(0, 0.3, 0);
                 Location eyeLoc = player.getEyeLocation();
-                Vector direction = eyeLoc.getDirection().normalize();
-
-                // Calculate right vector perpendicular to look direction and up vector
-                Vector right = direction.clone().crossProduct(new Vector(0, 1, 0)).normalize();
-
-                // Offset the eye location a bit to the right (e.g. 0.3 blocks)
+                Vector dir = eyeLoc.getDirection().normalize();
+                Vector right = dir.clone().crossProduct(new Vector(0, 1, 0)).normalize();
                 Location startLocation = eyeLoc.clone().add(right.multiply(0.3));
 
-
                 if (!returning) {
-                    Location currentLocation = startLocation.clone().add(direction.clone().multiply(step));
+                    Location currentLocation = startLocation.clone().add(dir.clone().multiply(step));
                     step += 1.5;
 
                     spawnLine(startLocation, currentLocation);
-                    // currentLocation = the moving beam tip location
                     currentLocation.getWorld().spawnParticle(Particle.CRIT, currentLocation, 20, 0.5, 0.5, 0.5, 0.1);
 
                     if (!currentLocation.getBlock().isPassable()) {
@@ -79,9 +114,8 @@ public class GraplingHandeler implements Listener {
                         }
                     }
 
-                    if (step > 20) {
-                        cancel();
-                    }
+                    if (step > 20) cancel();
+
                 } else {
                     if (hookedEntity == null || !hookedEntity.isValid()) {
                         cancel();
@@ -93,13 +127,9 @@ public class GraplingHandeler implements Listener {
                     hookedEntity.getWorld().spawnParticle(Particle.CRIT, hookedEntity.getLocation(), 10, 0.2, 0.2, 0.2, 0);
 
                     step -= 0.5;
-                    Location currentLocation = startLocation.clone().add(direction.clone().multiply(step));
-
                     spawnLine(hookedEntity.getLocation(), playerFeet);
 
-                    if (step <= 0) {
-                        cancel();
-                    }
+                    if (step <= 0) cancel();
                 }
             }
 
@@ -115,6 +145,31 @@ public class GraplingHandeler implements Listener {
                     Location particleLoc = from.clone().add(unit.clone().multiply(i * gap));
                     particleLoc.getWorld().spawnParticle(Particle.END_ROD, particleLoc, 1, 0, 0, 0, 0);
                 }
+            }
+        }.runTaskTimer(plugin, 0L, 2L);
+
+        // Cooldown updater
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                long elapsed = System.currentTimeMillis() - now;
+                if (elapsed >= grapplingCooldownTimeMs) {
+                    cooldownBar.removeAll();
+                    grapplingCooldownBars.remove(playerId);
+
+                    BossBar ready = Bukkit.createBossBar(
+                            GREEN + "GRAPPLING READY",
+                            BarColor.GREEN,
+                            BarStyle.SOLID
+                    );
+                    ready.addPlayer(player);
+                    grapplingReadyBars.put(playerId, ready);
+                    cancel();
+                    return;
+                }
+
+                double progress = 1.0 - ((double) elapsed / grapplingCooldownTimeMs);
+                cooldownBar.setProgress(progress);
             }
         }.runTaskTimer(plugin, 0L, 2L);
     }
