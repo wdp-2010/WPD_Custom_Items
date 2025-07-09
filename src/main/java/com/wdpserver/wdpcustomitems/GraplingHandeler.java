@@ -27,28 +27,33 @@ public class GraplingHandeler implements Listener {
         if (!(event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) return;
 
         Player player = event.getPlayer();
-        Location startLocation = player.getEyeLocation();
-        Vector direction = startLocation.getDirection().normalize();
+        Vector direction = player.getLocation().getDirection().normalize();
+
+        // Save initial player location to detect movement
+        Location initialLocation = player.getLocation().clone();
 
         new BukkitRunnable() {
-            Location currentLocation = startLocation.clone();
+            double step = 0;
             boolean returning = false;
             Entity hookedEntity = null;
-            double step = 0;
 
             @Override
             public void run() {
-                Location playerEye = player.getEyeLocation();
+                // Cancel if player moved more than 0.1 blocks away from initial location
+                if (player.getLocation().distanceSquared(initialLocation) > 0.01) {
+                    cancel();
+                    return;
+                }
+
+                Location playerFeet = player.getLocation().clone().subtract(0, 0.5, 0);
+                Location startLocation = playerFeet.clone();
 
                 if (!returning) {
-                    // Move forward
-                    currentLocation = playerEye.clone().add(direction.clone().multiply(step));
+                    Location currentLocation = startLocation.clone().add(direction.clone().multiply(step));
                     step += 0.5;
 
-                    // Spawn particles along line from player eye to currentLocation
-                    spawnLine(playerEye, currentLocation);
+                    spawnLine(startLocation, currentLocation);
 
-                    // Check for entities near current location
                     for (Entity ent : currentLocation.getNearbyEntities(1, 1, 1)) {
                         if (ent instanceof LivingEntity && !ent.equals(player)) {
                             hookedEntity = ent;
@@ -57,28 +62,23 @@ public class GraplingHandeler implements Listener {
                         }
                     }
 
-                    if (step > 20) { // Max range (10 blocks)
+                    if (step > 20) {
                         cancel();
                     }
                 } else {
-                    if (hookedEntity != null && hookedEntity.isValid()) {
-                        // Pull entity toward player
-                        Vector pullVec = playerEye.toVector().subtract(hookedEntity.getLocation().toVector()).normalize().multiply(0.7);
-                        hookedEntity.setVelocity(pullVec);
-
-                        // Spawn particles on hooked entity
-                        hookedEntity.getWorld().spawnParticle(Particle.CRIT, hookedEntity.getLocation(), 10, 0.2, 0.2, 0.2, 0);
-                    } else {
+                    if (hookedEntity == null || !hookedEntity.isValid()) {
                         cancel();
                         return;
                     }
 
-                    // Move beam back towards player
-                    step -= 0.5;
-                    currentLocation = playerEye.clone().add(direction.clone().multiply(step));
+                    Vector pullVec = playerFeet.toVector().subtract(hookedEntity.getLocation().toVector()).normalize().multiply(0.7);
+                    hookedEntity.setVelocity(pullVec);
+                    hookedEntity.getWorld().spawnParticle(Particle.CRIT, hookedEntity.getLocation(), 10, 0.2, 0.2, 0.2, 0);
 
-                    // Spawn particles along line from hooked entity to player eye
-                    spawnLine(hookedEntity.getLocation(), playerEye);
+                    step -= 0.5;
+                    Location currentLocation = startLocation.clone().add(direction.clone().multiply(step));
+
+                    spawnLine(hookedEntity.getLocation(), playerFeet);
 
                     if (step <= 0) {
                         cancel();
@@ -86,13 +86,12 @@ public class GraplingHandeler implements Listener {
                 }
             }
 
-            // Spawn particles evenly along the line between two locations
             private void spawnLine(Location from, Location to) {
                 Vector vec = to.toVector().subtract(from.toVector());
                 double length = vec.length();
                 Vector unit = vec.normalize();
 
-                double gap = 0.3; // distance between particles
+                double gap = 0.3;
                 int count = (int) (length / gap);
 
                 for (int i = 0; i < count; i++) {
