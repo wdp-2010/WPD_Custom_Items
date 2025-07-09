@@ -50,7 +50,7 @@ public class GraplingHandeler implements Listener {
 
                 if (!returning) {
                     Location currentLocation = startLocation.clone().add(direction.clone().multiply(step));
-                    step += 0.5;
+                    step += 1.5;
 
                     spawnLine(startLocation, currentLocation);
 
