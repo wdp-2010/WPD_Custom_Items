@@ -56,6 +56,11 @@ public class GraplingHandeler implements Listener {
                     // currentLocation = the moving beam tip location
                     currentLocation.getWorld().spawnParticle(Particle.CRIT, currentLocation, 20, 0.5, 0.5, 0.5, 0.1);
 
+                    if (!currentLocation.getBlock().isPassable()) {
+                        cancel();
+                        return;
+                    }
+
                     for (Entity ent : currentLocation.getNearbyEntities(1, 1, 1)) {
                         if (ent instanceof LivingEntity && !ent.equals(player)) {
                             hookedEntity = ent;
