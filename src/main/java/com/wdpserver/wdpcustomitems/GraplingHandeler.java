@@ -45,8 +45,16 @@ public class GraplingHandeler implements Listener {
                     return;
                 }
 
-                Location playerFeet = player.getEyeLocation().clone().subtract(0, 0.6, 0);
-                Location startLocation = playerFeet.clone();
+                Location playerFeet = player.getEyeLocation().clone().subtract(0, 0.3, 0);
+                Location eyeLoc = player.getEyeLocation();
+                Vector direction = eyeLoc.getDirection().normalize();
+
+                // Calculate right vector perpendicular to look direction and up vector
+                Vector right = direction.clone().crossProduct(new Vector(0, 1, 0)).normalize();
+
+                // Offset the eye location a bit to the right (e.g. 0.3 blocks)
+                Location startLocation = eyeLoc.clone().add(right.multiply(0.3));
+
 
                 if (!returning) {
                     Location currentLocation = startLocation.clone().add(direction.clone().multiply(step));
