@@ -45,7 +45,7 @@ public class GraplingHandeler implements Listener {
                     return;
                 }
 
-                Location playerFeet = player.getLocation().clone().subtract(0, 0.5, 0);
+                Location playerFeet = player.getLocation().clone().subtract(0, 0.1, 0);
                 Location startLocation = playerFeet.clone();
 
                 if (!returning) {
