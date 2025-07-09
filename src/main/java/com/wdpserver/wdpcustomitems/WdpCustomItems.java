@@ -31,6 +31,7 @@ public class WdpCustomItems extends JavaPlugin {
 
     public long longCooldownTimeMs;
     public long shortCooldownTimeMs;
+    public long longCooldownTimeMsGrappling;
 
     @Override
     public void onEnable() {
@@ -57,6 +58,7 @@ public class WdpCustomItems extends JavaPlugin {
 
         longCooldownTimeMs = (long) (getConfig().getDouble("cooldown", 5.0) * 1000);
         shortCooldownTimeMs = (long) (getConfig().getDouble("short-cooldown", 2.0) * 1000);
+        longCooldownTimeMsGrappling = (long) (getConfig().getDouble("short-cooldown", 2.0) * 1000);
 
         // Register the recipe here
         registerBoltRecipe();
