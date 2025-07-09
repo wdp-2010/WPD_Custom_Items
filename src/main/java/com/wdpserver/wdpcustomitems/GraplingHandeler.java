@@ -83,7 +83,7 @@ public class GraplingHandeler implements Listener {
             @Override
             public void run() {
                 if (player.getLocation().distanceSquared(initialLocation) > 0.01) {
-                    player.sendMessage(RED + "You moved, Grappling Hook canceled.");
+                    player.sendMessage(RED + "You moved, grappling hook canceled.");
                     cancel();
                     return;
                 }
