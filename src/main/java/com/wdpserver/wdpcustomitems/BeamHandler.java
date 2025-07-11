@@ -20,10 +20,6 @@ public class BeamHandler implements Listener {
 
     private final WdpCustomItems plugin;
 
-    private final Map<UUID, Long> beamCooldowns = new HashMap<>();
-    private final Map<UUID, BossBar> beamCooldownBars = new HashMap<>();
-    private final Map<UUID, BossBar> beamReadyBars = new HashMap<>();
-
     public BeamHandler(WdpCustomItems plugin) {
         this.plugin = plugin;
     }
@@ -39,36 +35,34 @@ public class BeamHandler implements Listener {
         ItemMeta meta = item.getItemMeta();
         if (!meta.getPersistentDataContainer().has(plugin.beamSwordKey, PersistentDataType.BYTE)) return;
 
-        if (plugin.hasBeam.containsKey(playerId)) {
-            player.sendMessage(RED + "You already used the beam. Please wait.");
-            return;
-        }
-
-        BossBar readyBar = beamReadyBars.remove(playerId);
+        BossBar readyBar = plugin.readyBars.remove(playerId);
         if (readyBar != null) readyBar.removeAll();
 
         long now = System.currentTimeMillis();
-        long defaultCooldown = plugin.longCooldownTimeMs;
 
-        // Check cooldown
-        if (beamCooldowns.containsKey(playerId)) {
-            long last = beamCooldowns.get(playerId);
+        // Check cooldown based on actual duration used
+        if (plugin.cooldowns.containsKey(playerId)) {
+            long last = plugin.cooldowns.get(playerId);
+            long duration = plugin.beamCooldownDurations.getOrDefault(playerId, plugin.longCooldownTimeMs);
             long elapsed = now - last;
 
-            if (elapsed < defaultCooldown) {
-                long secondsLeft = ((defaultCooldown - elapsed) / 1000) + 1;
+            if (elapsed < duration) {
+                long secondsLeft = ((duration - elapsed) / 1000) + 1;
 
-                BossBar cooldownBar = beamCooldownBars.get(playerId);
+                BossBar cooldownBar = plugin.cooldownBars.get(playerId);
                 if (cooldownBar != null && !cooldownBar.getPlayers().contains(player)) {
                     cooldownBar.addPlayer(player);
                 }
 
-                player.sendMessage(RED + "Beam Cooldown: " + secondsLeft + "s remaining.");
+                player.sendMessage(RED + "Cooldown: " + secondsLeft + "s remaining.");
                 return;
             }
         }
 
-        plugin.hasBeam.put(playerId, true);
+        if (plugin.hasBeam.containsKey(playerId)) {
+            player.sendMessage("You have a beam, you must wait a moment");
+            return;
+        }
 
         BeamSword beamSword = new BeamSword(item, plugin);
 
@@ -82,6 +76,14 @@ public class BeamHandler implements Listener {
         int particles = 50;
         double step = maxDistance / particles;
 
+        BossBar cooldownBar = Bukkit.createBossBar(
+                RED + "BEAM COOLDOWN",
+                BarColor.RED,
+                BarStyle.SEGMENTED_10
+        );
+        plugin.cooldownBars.put(playerId, cooldownBar);
+        cooldownBar.addPlayer(player);
+
         new BukkitRunnable() {
             int i = 0;
             boolean hitBlock = false;
@@ -91,7 +93,13 @@ public class BeamHandler implements Listener {
             @Override
             public void run() {
                 if (i >= particles || hitBlock) {
-                    finishCooldown(hasHitEntity, player);
+                    long cooldown = hasHitEntity ? plugin.longCooldownTimeMs : plugin.shortCooldownTimeMs;
+
+                    plugin.cooldowns.put(playerId, System.currentTimeMillis());
+                    plugin.beamCooldownDurations.put(playerId, cooldown);
+                    plugin.hasBeam.remove(playerId);
+
+                    startCooldownBar(player, playerId, cooldown, cooldownBar);
                     cancel();
                     return;
                 }
@@ -111,13 +119,25 @@ public class BeamHandler implements Listener {
                         }
 
                         target.damage(beamSword.damage, player);
+
                         hasHitEntity = true;
+                        plugin.hasBeam.remove(playerId);
                     }
                 }
 
+                plugin.hasBeam.put(playerId, true);
+
                 if (point.getBlock().getType().isSolid()) {
+                    long cooldown = hasHitEntity ? plugin.longCooldownTimeMs : plugin.shortCooldownTimeMs;
+
+                    plugin.cooldowns.put(playerId, System.currentTimeMillis());
+                    plugin.beamCooldownDurations.put(playerId, cooldown);
                     hitBlock = true;
-                    if (!hasHitEntity) finishCooldown(false, player);
+                    plugin.hasBeam.remove(playerId);
+
+                    startCooldownBar(player, playerId, cooldown, cooldownBar);
+                    cancel();
+                    return;
                 }
 
                 player.getWorld().spawnParticle(
@@ -139,21 +159,7 @@ public class BeamHandler implements Listener {
         }.runTaskTimer(plugin, 0L, particleSpeed);
     }
 
-    private void finishCooldown(boolean hitEntity, Player player) {
-        UUID playerId = player.getUniqueId();
-        plugin.hasBeam.remove(playerId);
-
-        long cooldown = hitEntity ? plugin.longCooldownTimeMs : plugin.shortCooldownTimeMs;
-        beamCooldowns.put(playerId, System.currentTimeMillis());
-
-        BossBar cooldownBar = Bukkit.createBossBar(
-                RED + "BEAM COOLDOWN",
-                BarColor.RED,
-                BarStyle.SEGMENTED_10
-        );
-        beamCooldownBars.put(playerId, cooldownBar);
-        cooldownBar.addPlayer(player);
-
+    private void startCooldownBar(Player player, UUID playerId, long cooldown, BossBar cooldownBar) {
         long start = System.currentTimeMillis();
 
         new BukkitRunnable() {
@@ -162,18 +168,19 @@ public class BeamHandler implements Listener {
                 long elapsed = System.currentTimeMillis() - start;
                 if (elapsed >= cooldown) {
                     cooldownBar.removeAll();
-                    beamCooldownBars.remove(playerId);
+                    plugin.cooldownBars.remove(playerId);
 
-                    BossBar readyBar = Bukkit.createBossBar(
+                    BossBar ready = Bukkit.createBossBar(
                             GREEN + "BEAM READY",
                             BarColor.GREEN,
                             BarStyle.SOLID
                     );
-                    readyBar.addPlayer(player);
-                    beamReadyBars.put(playerId, readyBar);
+                    ready.addPlayer(player);
+                    plugin.readyBars.put(playerId, ready);
                     cancel();
                     return;
                 }
+
                 double progress = 1.0 - ((double) elapsed / cooldown);
                 cooldownBar.setProgress(progress);
             }
@@ -186,26 +193,26 @@ public class BeamHandler implements Listener {
         UUID playerId = player.getUniqueId();
 
         ItemStack newItem = player.getInventory().getItem(event.getNewSlot());
-        boolean holdingBeamSword = false;
+        boolean holdingSword = false;
 
         if (newItem != null && newItem.getType() == Material.DIAMOND_SWORD && newItem.hasItemMeta()) {
             ItemMeta meta = newItem.getItemMeta();
             if (meta.getPersistentDataContainer().has(plugin.beamSwordKey, PersistentDataType.BYTE)) {
-                holdingBeamSword = true;
+                holdingSword = true;
             }
         }
 
-        if (!holdingBeamSword) {
-            BossBar cooldownBar = beamCooldownBars.get(playerId);
+        if (!holdingSword) {
+            BossBar cooldownBar = plugin.cooldownBars.get(playerId);
             if (cooldownBar != null) cooldownBar.removePlayer(player);
 
-            BossBar readyBar = beamReadyBars.get(playerId);
+            BossBar readyBar = plugin.readyBars.get(playerId);
             if (readyBar != null) readyBar.removePlayer(player);
         } else {
-            BossBar cooldownBar = beamCooldownBars.get(playerId);
+            BossBar cooldownBar = plugin.cooldownBars.get(playerId);
             if (cooldownBar != null) cooldownBar.addPlayer(player);
 
-            BossBar readyBar = beamReadyBars.get(playerId);
+            BossBar readyBar = plugin.readyBars.get(playerId);
             if (readyBar != null) readyBar.addPlayer(player);
         }
     }
