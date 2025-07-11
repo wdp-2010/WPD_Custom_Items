@@ -139,7 +139,7 @@ public class GraplingHandeler implements Listener {
                     step -= 0.5;
                     spawnLine(hookedEntity.getLocation(), playerFeet);
 
-                    if (step <= 0) {
+                    if (step <= 3) {
                         finishCooldown(grabbedSomething);
                         cancel();
                     }
