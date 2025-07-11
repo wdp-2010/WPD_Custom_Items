@@ -28,6 +28,7 @@ public class WdpCustomItems extends JavaPlugin {
     public final Map<UUID, Long> cooldowns = new HashMap<>();
     public final Map<UUID, BossBar> cooldownBars = new HashMap<>();
     public final Map<UUID, BossBar> readyBars = new HashMap<>();
+
     public Map<UUID, Long> beamCooldownDurations = new HashMap<>();
     public Map<UUID, Boolean> hasGrappling = new HashMap<>();
 
@@ -35,12 +36,19 @@ public class WdpCustomItems extends JavaPlugin {
     public long shortCooldownTimeMs;
     public long longCooldownTimeMsGrappling;
 
+    private RecipeManager recipeManager;
+
     @Override
     public void onEnable() {
         ShapelessRecipe recolorRecipe = new ShapelessRecipe(
                 new NamespacedKey(this, "recolor_red"),
                 new ItemStack(Material.DIAMOND_SWORD)
         );
+
+        this.recipeManager = new RecipeManager();
+
+        RecipeCommand recipeCommand = new RecipeCommand(recipeManager);
+
         recolorRecipe.addIngredient(Material.DIAMOND_SWORD);
         recolorRecipe.addIngredient(Material.RED_DYE);
         getServer().addRecipe(recolorRecipe);
@@ -55,7 +63,7 @@ public class WdpCustomItems extends JavaPlugin {
         beamKnockbackKey = new NamespacedKey(this, "beam_knockback");
         beamStoneKey = new NamespacedKey(this, "beamstone");
         throwStoneKey = new NamespacedKey(this, "throwstone");
-        jumpBootsKey = new NamespacedKey(this, "dubleljumpboots");
+        jumpBootsKey = new NamespacedKey(this, "dubblejumpboots");
         grapplingKey = new NamespacedKey(this, "grapplinghook");
 
         longCooldownTimeMs = (long) (getConfig().getDouble("beam-sword.cooldown", 5.0) * 1000);
@@ -75,6 +83,8 @@ public class WdpCustomItems extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ThrowHandeler(this), this);
         getServer().getPluginManager().registerEvents(new DubbleJumpHandler(this), this);
         getServer().getPluginManager().registerEvents(new GraplingHandeler(this), this);
+        getServer().getPluginManager().registerEvents(recipeCommand, this);
+
 
         Objects.requireNonNull(getCommand("givesword")).setExecutor(new GiveSwordCommand(this));
         Objects.requireNonNull(getCommand("reloadconfig")).setExecutor((sender, command, label, args) -> {
@@ -82,6 +92,7 @@ public class WdpCustomItems extends JavaPlugin {
             sender.sendMessage("§aConfig reloaded.");
             return true;
         });
+        getCommand("recipes").setExecutor(recipeCommand);
 
         getLogger().info("WDP Custom Items started!");
     }
@@ -166,6 +177,9 @@ public class WdpCustomItems extends JavaPlugin {
     private void registerBoltRecipe() {
         ItemStack bolt = new ItemStack(Material.NETHER_STAR);
         ItemMeta meta = bolt.getItemMeta();
+
+        NamespacedKey key = this.boltKey;
+
         meta.setDisplayName("§bLightning Bolt");
         meta.getPersistentDataContainer().set(boltKey, PersistentDataType.BYTE, (byte) 1);
         meta.setLore(Collections.singletonList("§fWith this in your inventory, the Epic Sword spawn lightning."));
@@ -173,7 +187,7 @@ public class WdpCustomItems extends JavaPlugin {
 
         bolt.setItemMeta(meta);
 
-        ShapedRecipe recipe = new ShapedRecipe(boltKey, bolt);
+        ShapedRecipe recipe = new ShapedRecipe(key, bolt);
         recipe.shape(
                 "  D" ,
                 " N ",
@@ -181,6 +195,8 @@ public class WdpCustomItems extends JavaPlugin {
         );
         recipe.setIngredient('D', Material.DIAMOND);
         recipe.setIngredient('N', Material.NETHER_STAR);
+
+        recipeManager.registerRecipe("Bolt Stone", key, recipe);
 
         getServer().addRecipe(recipe);
     }
@@ -190,9 +206,11 @@ public class WdpCustomItems extends JavaPlugin {
         int knockback = getConfig().getInt("beam-sword.knockback", 3);
         long cooldown = getConfig().getLong("beam-sword.cooldown", 3);
 
+        NamespacedKey key = this.beamSwordKey;
+
         ItemStack result = createCustomBeamSword(damage, color, knockback, cooldown);  //  config
         ItemStack beamStone = createBeamStone();
-        ShapedRecipe recipe = new ShapedRecipe(new NamespacedKey(this, "beam_sword"), result);
+        ShapedRecipe recipe = new ShapedRecipe(key, result);
 
         // Define shape: example shape, you can adjust (DONE)
         recipe.shape(
@@ -205,13 +223,17 @@ public class WdpCustomItems extends JavaPlugin {
         recipe.setIngredient('D', Material.DIAMOND);
         recipe.setIngredient('S', Material.DIAMOND_SWORD);
 
+        recipeManager.registerRecipe("Beam Sword", key, recipe);
+
         getServer().addRecipe(recipe);
     }
 
     public void registerBeamStoneRecipe() {
         ItemStack result = createBeamStone();
 
-        ShapedRecipe recipe = new ShapedRecipe(new NamespacedKey(this, "beam_stone"), result);
+        NamespacedKey key = this.beamStoneKey;
+
+        ShapedRecipe recipe = new ShapedRecipe(key, result);
 
         // Define shape: example shape, you can adjust (DONE)
         recipe.shape(
@@ -224,13 +246,17 @@ public class WdpCustomItems extends JavaPlugin {
         recipe.setIngredient('D', Material.DIAMOND);
         recipe.setIngredient('F', Material.SUNFLOWER);
 
+        recipeManager.registerRecipe("Beam Stone", key, recipe);
+
         getServer().addRecipe(recipe);
     }
     public void registerThrowStoneRecipe() {
         ItemStack result = createThrowRock();
         result.setAmount(9);
 
-        ShapedRecipe recipe = new ShapedRecipe(new NamespacedKey(this, "throw_stone"), result);
+        NamespacedKey key = this.throwStoneKey;
+
+        ShapedRecipe recipe = new ShapedRecipe(key, result);
 
         recipe.shape(
                 "CCC",
@@ -240,12 +266,16 @@ public class WdpCustomItems extends JavaPlugin {
 
         recipe.setIngredient('C', Material.COBBLESTONE);
 
+        recipeManager.registerRecipe("Throw Stone", key, recipe);
+
         getServer().addRecipe(recipe);
     }
     public void registerJumpBootsRecipe() {
         ItemStack result = createJumpBoots();
 
-        ShapedRecipe recipe = new ShapedRecipe(new NamespacedKey(this, "jumpboots"), result);
+        NamespacedKey key = this.jumpBootsKey;
+
+        ShapedRecipe recipe = new ShapedRecipe(key, result);
 
         recipe.shape(
                 "   ",
@@ -256,12 +286,14 @@ public class WdpCustomItems extends JavaPlugin {
         recipe.setIngredient('I', Material.IRON_INGOT);
         recipe.setIngredient('W', Material.WIND_CHARGE);
 
+        recipeManager.registerRecipe("Double Jump Boots", key, recipe);
+
         getServer().addRecipe(recipe);
     }
     public void registerGrapplingHookRecipe() {
         ItemStack result = createGrapplingHook();
-
-        ShapedRecipe recipe = new ShapedRecipe(new NamespacedKey(this, "grapplinghook"), result);
+        NamespacedKey key = this.grapplingKey;
+        ShapedRecipe recipe = new ShapedRecipe(key, result);
 
         recipe.shape(
                 " T ",
@@ -271,6 +303,8 @@ public class WdpCustomItems extends JavaPlugin {
 
         recipe.setIngredient('T', Material.TRIDENT);
         recipe.setIngredient('F', Material.FISHING_ROD);
+
+        recipeManager.registerRecipe("Grappling Hook", key, recipe);
 
         getServer().addRecipe(recipe);
     }

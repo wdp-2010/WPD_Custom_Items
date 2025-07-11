@@ -7,3 +7,5 @@ commands:
     description: Gives a custom beam sword
   reloadconfig:
     description: Reloads the plugin config
+  recipes:
+    description: Get all the custom recipe from WDP Custom Items
