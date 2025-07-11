@@ -136,7 +136,7 @@ public class GraplingHandeler implements Listener {
                     hookedEntity.setVelocity(pullVec);
                     hookedEntity.getWorld().spawnParticle(Particle.CRIT, hookedEntity.getLocation(), 10, 0.2, 0.2, 0.2, 0);
 
-                    step -= 1.5;
+                    step -= 0.5;
                     spawnLine(hookedEntity.getLocation(), playerFeet);
 
                     if (step <= 0) {
