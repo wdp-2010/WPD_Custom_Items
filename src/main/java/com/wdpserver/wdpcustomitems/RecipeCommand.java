@@ -4,6 +4,7 @@ import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -11,9 +12,12 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
-public class RecipeCommand implements CommandExecutor, Listener {
+public class RecipeCommand implements CommandExecutor, Listener, TabCompleter {
 
     private final RecipeManager recipeManager;
 
@@ -110,5 +114,21 @@ public class RecipeCommand implements CommandExecutor, Listener {
         if (title.startsWith("Recipe:")) {
             event.setCancelled(true);
         }
+    }
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        if (args.length == 1) {
+            String partial = args[0].toLowerCase();
+            List<String> completions = new ArrayList<>();
+            for (RecipeManager.RecipeInfo recipeInfo : recipeManager.getRecipes().values()) {
+                String name = recipeInfo.displayName();
+                if (name.toLowerCase().startsWith(partial)) {
+                    completions.add(name);
+                }
+            }
+            Collections.sort(completions);
+            return completions;
+        }
+        return Collections.emptyList();
     }
 }
