@@ -65,11 +65,11 @@ public class RecipeCommand implements CommandExecutor, Listener {
 
         for (int row = 0; row < shape.length; row++) {
             String line = shape[row];
-            for (int col = 1; col < line.length(); col++) {
+            for (int col = 0; col < line.length(); col++) {
                 char key = line.charAt(col);
                 if (key == ' ') continue;  // skip empty spots
 
-                int slot = row * 9 + col;  // row * 9 + col to place in correct GUI slot
+                int slot = row * 9 + (col + 1);  // row * 9 + col to place in correct GUI slot
 
                 RecipeChoice choice = ingredientMap.get(key);
                 if (choice instanceof RecipeChoice.MaterialChoice materialChoice) {
