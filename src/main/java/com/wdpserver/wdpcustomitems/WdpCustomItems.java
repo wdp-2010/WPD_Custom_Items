@@ -28,6 +28,7 @@ public class WdpCustomItems extends JavaPlugin {
     public final Map<UUID, Long> cooldowns = new HashMap<>();
     public final Map<UUID, BossBar> cooldownBars = new HashMap<>();
     public final Map<UUID, BossBar> readyBars = new HashMap<>();
+    public Map<UUID, Boolean> hasGrappling = new HashMap<>();
 
     public long longCooldownTimeMs;
     public long shortCooldownTimeMs;

@@ -21,7 +21,6 @@ import static org.bukkit.ChatColor.*;
 public class GraplingHandeler implements Listener {
 
     private final WdpCustomItems plugin;
-    private final long grapplingCooldownTimeMs;
 
     // Independent cooldown and bar tracking
     private final Map<UUID, Long> grapplingCooldowns = new HashMap<>();
@@ -30,7 +29,6 @@ public class GraplingHandeler implements Listener {
 
     public GraplingHandeler(WdpCustomItems plugin) {
         this.plugin = plugin;
-        this.grapplingCooldownTimeMs = plugin.longCooldownTimeMsGrappling; // Use separate config if needed
     }
 
     @EventHandler
@@ -43,18 +41,27 @@ public class GraplingHandeler implements Listener {
         Player player = event.getPlayer();
         UUID playerId = player.getUniqueId();
 
+        // Prevent multiple grappling runs
+        if (plugin.hasGrappling.getOrDefault(playerId, false)) {
+            player.sendMessage(RED + "You are already using the grappling hook.");
+            return;
+        }
+        plugin.hasGrappling.put(playerId, true);
+
         // Remove ready bar
         BossBar readyBar = grapplingReadyBars.remove(playerId);
         if (readyBar != null) readyBar.removeAll();
 
         long now = System.currentTimeMillis();
+        long defaultCooldown = plugin.longCooldownTimeMsGrappling;
 
+        // Check cooldown
         if (grapplingCooldowns.containsKey(playerId)) {
             long last = grapplingCooldowns.get(playerId);
             long elapsed = now - last;
 
-            if (elapsed < grapplingCooldownTimeMs) {
-                long secondsLeft = ((grapplingCooldownTimeMs - elapsed) / 1000) + 1;
+            if (elapsed < defaultCooldown) {
+                long secondsLeft = ((defaultCooldown - elapsed) / 1000) + 1;
 
                 BossBar cooldownBar = grapplingCooldownBars.get(playerId);
                 if (cooldownBar != null && !cooldownBar.getPlayers().contains(player)) {
@@ -62,32 +69,24 @@ public class GraplingHandeler implements Listener {
                 }
 
                 player.sendMessage(RED + "Grappling Hook Cooldown: " + secondsLeft + "s remaining.");
+                plugin.hasGrappling.remove(playerId);
                 return;
             }
         }
 
-        grapplingCooldowns.put(playerId, now);
-
-        BossBar cooldownBar = Bukkit.createBossBar(
-                RED + "GRAPPLING COOLDOWN",
-                BarColor.RED,
-                BarStyle.SEGMENTED_10
-        );
-        grapplingCooldownBars.put(playerId, cooldownBar);
-        cooldownBar.addPlayer(player);
-
-        Vector direction = player.getLocation().getDirection().normalize();
         Location initialLocation = player.getLocation().clone();
 
         new BukkitRunnable() {
             double step = 0;
             boolean returning = false;
+            boolean grabbedSomething = false;
             Entity hookedEntity = null;
 
             @Override
             public void run() {
                 if (player.getLocation().distanceSquared(initialLocation) > 0.01) {
                     player.sendMessage(RED + "You moved, grappling hook canceled.");
+                    finishCooldown(grabbedSomething);
                     cancel();
                     return;
                 }
@@ -106,6 +105,7 @@ public class GraplingHandeler implements Listener {
                     currentLocation.getWorld().spawnParticle(Particle.CRIT, currentLocation, 20, 0.5, 0.5, 0.5, 0.1);
 
                     if (!currentLocation.getBlock().isPassable()) {
+                        finishCooldown(grabbedSomething);
                         cancel();
                         return;
                     }
@@ -114,14 +114,20 @@ public class GraplingHandeler implements Listener {
                         if (ent instanceof LivingEntity && !ent.equals(player)) {
                             hookedEntity = ent;
                             returning = true;
+                            grabbedSomething = true;
                             break;
                         }
                     }
 
-                    if (step > 20) cancel();
+                    if (step > 20) {
+                        finishCooldown(grabbedSomething);
+                        cancel();
+                        return;
+                    }
 
                 } else {
                     if (hookedEntity == null || !hookedEntity.isValid()) {
+                        finishCooldown(grabbedSomething);
                         cancel();
                         return;
                     }
@@ -133,8 +139,50 @@ public class GraplingHandeler implements Listener {
                     step -= 0.5;
                     spawnLine(hookedEntity.getLocation(), playerFeet);
 
-                    if (step <= 0) cancel();
+                    if (step <= 0) {
+                        finishCooldown(grabbedSomething);
+                        cancel();
+                    }
                 }
+            }
+
+            private void finishCooldown(boolean grabbed) {
+                plugin.hasGrappling.remove(playerId);
+
+                long finalCooldown = grabbed ? plugin.longCooldownTimeMsGrappling : plugin.shortCooldownTimeMs;
+                grapplingCooldowns.put(playerId, System.currentTimeMillis());
+
+                BossBar cooldownBar = Bukkit.createBossBar(
+                        RED + "GRAPPLING COOLDOWN",
+                        BarColor.RED,
+                        BarStyle.SEGMENTED_10
+                );
+                grapplingCooldownBars.put(playerId, cooldownBar);
+                cooldownBar.addPlayer(player);
+
+                long start = System.currentTimeMillis();
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        long elapsed = System.currentTimeMillis() - start;
+                        if (elapsed >= finalCooldown) {
+                            cooldownBar.removeAll();
+                            grapplingCooldownBars.remove(playerId);
+
+                            BossBar ready = Bukkit.createBossBar(
+                                    GREEN + "GRAPPLING READY",
+                                    BarColor.GREEN,
+                                    BarStyle.SOLID
+                            );
+                            ready.addPlayer(player);
+                            grapplingReadyBars.put(playerId, ready);
+                            cancel();
+                            return;
+                        }
+                        double progress = 1.0 - ((double) elapsed / finalCooldown);
+                        cooldownBar.setProgress(progress);
+                    }
+                }.runTaskTimer(plugin, 0L, 2L);
             }
 
             private void spawnLine(Location from, Location to) {
@@ -151,32 +199,8 @@ public class GraplingHandeler implements Listener {
                 }
             }
         }.runTaskTimer(plugin, 0L, 2L);
-
-        // Cooldown updater
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                long elapsed = System.currentTimeMillis() - now;
-                if (elapsed >= grapplingCooldownTimeMs) {
-                    cooldownBar.removeAll();
-                    grapplingCooldownBars.remove(playerId);
-
-                    BossBar ready = Bukkit.createBossBar(
-                            GREEN + "GRAPPLING READY",
-                            BarColor.GREEN,
-                            BarStyle.SOLID
-                    );
-                    ready.addPlayer(player);
-                    grapplingReadyBars.put(playerId, ready);
-                    cancel();
-                    return;
-                }
-
-                double progress = 1.0 - ((double) elapsed / grapplingCooldownTimeMs);
-                cooldownBar.setProgress(progress);
-            }
-        }.runTaskTimer(plugin, 0L, 2L);
     }
+
     @EventHandler
     public void onItemSwitch(PlayerItemHeldEvent event) {
         Player player = event.getPlayer();
@@ -206,5 +230,4 @@ public class GraplingHandeler implements Listener {
             if (readyBar != null) readyBar.addPlayer(player);
         }
     }
-
 }
