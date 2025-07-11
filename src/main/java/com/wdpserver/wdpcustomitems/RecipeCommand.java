@@ -61,7 +61,7 @@ public class RecipeCommand implements CommandExecutor, Listener {
         String[] shape = shaped.getShape();
         Map<Character, RecipeChoice> ingredientMap = shaped.getChoiceMap();
 
-        Inventory gui = Bukkit.createInventory(null, 27, ChatColor.GREEN + "Recipe: " + recipeInfo.displayName());
+        Inventory gui = Bukkit.createInventory(null, 27, ChatColor.YELLOW + "Recipe: " + recipeInfo.displayName());
 
         for (int row = 0; row < shape.length; row++) {
             String line = shape[row];
