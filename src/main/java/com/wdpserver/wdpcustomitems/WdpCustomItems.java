@@ -57,9 +57,9 @@ public class WdpCustomItems extends JavaPlugin {
         jumpBootsKey = new NamespacedKey(this, "dubleljumpboots");
         grapplingKey = new NamespacedKey(this, "grapplinghook");
 
-        longCooldownTimeMs = (long) (getConfig().getDouble("cooldown", 5.0) * 1000);
-        shortCooldownTimeMs = (long) (getConfig().getDouble("short-cooldown", 2.0) * 1000);
-        longCooldownTimeMsGrappling = (long) (getConfig().getDouble("grappling-cooldown", 5.0) * 1000);
+        longCooldownTimeMs = (long) (getConfig().getDouble("beam-sword.cooldown", 5.0) * 1000);
+        shortCooldownTimeMs = (long) (getConfig().getDouble("beam-sword.short-cooldown", 2.0) * 1000);
+        longCooldownTimeMsGrappling = (long) (getConfig().getDouble("grappling-hook.cooldown", 5.0) * 1000);
 
         // Register the recipe here
         registerBoltRecipe();
@@ -184,7 +184,12 @@ public class WdpCustomItems extends JavaPlugin {
         getServer().addRecipe(recipe);
     }
     public void registerBeamSwordRecipe() {
-        ItemStack result = createCustomBeamSword(getConfig().getInt("beam-damage", 10), "RED", getConfig().getDouble("knockback", 1.5), getConfig().getLong("knockback", 3));  //  config
+        int damage = getConfig().getInt("beam-sword.damage", 10);
+        String color = getConfig().getString("beam-sword.knockback", "RED");
+        int knockback = getConfig().getInt("beam-sword.knockback", 3);
+        long cooldown = getConfig().getLong("beam-sword.cooldown", 3);
+
+        ItemStack result = createCustomBeamSword(damage, color, knockback, cooldown);  //  config
         ItemStack beamStone = createBeamStone();
         ShapedRecipe recipe = new ShapedRecipe(new NamespacedKey(this, "beam_sword"), result);
 

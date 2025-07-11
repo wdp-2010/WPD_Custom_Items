@@ -1,15 +1,13 @@
 # WDP Custom Items Config
+beam-sword:
+  damage: 15
+  knockback: 3
+  cooldown: 5.0
+  color: RED # default color
+  short-cooldown: 1.0 # If nothing gets hit
+  speed: 1 # Ticks between next step: step = distance / particle (50)
+  range: 50.0 # Distance
 
-beam-damage: 15
-
-knockback: 3
-
-# Cooldown in seconds between beam shots
-cooldown: 5.0
-short-cooldown: 1.0
-
-# How many ticks between each particle step of the beam
-beam-speed: 1
-
-# Maximum beam distance in blocks
-range: 50.0
+grappling-hook:
+  short-cooldown: 1.0 # Invalid, using beam-sword.short cooldown
+  cooldown: 5.0
