@@ -33,7 +33,7 @@ public class BeamHandler implements Listener {
         if (item == null || item.getType() != Material.DIAMOND_SWORD || !item.hasItemMeta()) return;
 
         ItemMeta meta = item.getItemMeta();
-        if (!meta.getPersistentDataContainer().has(plugin.beamSwordKey, PersistentDataType.BYTE)) return;
+        if (!meta.getPersistentDataContainer().has(plugin.diaBeamSwordKey, PersistentDataType.BYTE)) return;
 
         BossBar readyBar = plugin.readyBars.remove(playerId);
         if (readyBar != null) readyBar.removeAll();
@@ -197,7 +197,7 @@ public class BeamHandler implements Listener {
 
         if (newItem != null && newItem.getType() == Material.DIAMOND_SWORD && newItem.hasItemMeta()) {
             ItemMeta meta = newItem.getItemMeta();
-            if (meta.getPersistentDataContainer().has(plugin.beamSwordKey, PersistentDataType.BYTE)) {
+            if (meta.getPersistentDataContainer().has(plugin.diaBeamSwordKey, PersistentDataType.BYTE)) {
                 holdingSword = true;
             }
         }

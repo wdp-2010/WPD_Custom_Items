@@ -12,7 +12,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.*;
 
 public class WdpCustomItems extends JavaPlugin {
-    public NamespacedKey beamSwordKey;
+    public NamespacedKey diaBeamSwordKey;
     public NamespacedKey boltKey;
     public NamespacedKey beamDamageKey;
     public NamespacedKey beamColorKey;
@@ -57,7 +57,7 @@ public class WdpCustomItems extends JavaPlugin {
         saveDefaultConfig();
 
         // Namespaced keys
-        beamSwordKey = new NamespacedKey(this, "plugin_sword");
+        diaBeamSwordKey = new NamespacedKey(this, "plugin_sword");
         boltKey = new NamespacedKey(this, "boltkey");
         beamDamageKey = new NamespacedKey(this, "beam_damage");
         beamColorKey = new NamespacedKey(this, "beam_color");
@@ -80,6 +80,7 @@ public class WdpCustomItems extends JavaPlugin {
         registerThrowStoneRecipe();
         registerJumpBootsRecipe();
         registerGrapplingHookRecipe();
+        registerNetheriteBeamSwordUpgradeRecipe();
 
         getServer().getPluginManager().registerEvents(new BeamHandler(this), this);
         getServer().getPluginManager().registerEvents(new RecolorCraftHandler(this), this);
@@ -106,12 +107,17 @@ public class WdpCustomItems extends JavaPlugin {
         getLogger().info("WDP Custom Items disabled.");
     }
 
+    private boolean isBeamSword(ItemStack item) {
+        if (item == null || !item.hasItemMeta()) return false;
+        return item.getItemMeta().getPersistentDataContainer().has(diaBeamSwordKey, PersistentDataType.BYTE);
+    }
+
     public ItemStack createCustomBeamSword(int damage, String color, double knockback, long cooldown, double range, Material material) {
         ItemStack sword = new ItemStack(material);
         ItemMeta meta = sword.getItemMeta();
 
         meta.setDisplayName("§bBeam Sword");
-        meta.getPersistentDataContainer().set(beamSwordKey, PersistentDataType.BYTE, (byte) 1);
+        meta.getPersistentDataContainer().set(diaBeamSwordKey, PersistentDataType.BYTE, (byte) 1);
         meta.getPersistentDataContainer().set(beamDamageKey, PersistentDataType.INTEGER, damage);
         meta.getPersistentDataContainer().set(beamColorKey, PersistentDataType.STRING, color);
         meta.getPersistentDataContainer().set(beamKnockbackKey, PersistentDataType.DOUBLE, knockback);
@@ -214,7 +220,7 @@ public class WdpCustomItems extends JavaPlugin {
         long cooldown = getConfig().getLong("diamond-beam-sword.cooldown", 5);
         double range = getConfig().getDouble("diamond-beam-sword.range", 50);
 
-        NamespacedKey key = this.beamSwordKey;
+        NamespacedKey key = this.diaBeamSwordKey;
 
         ItemStack result = createCustomBeamSword(damage, color, knockback, cooldown, range, Material.DIAMOND_SWORD);  //  config
         ItemStack beamStone = createBeamStone();
@@ -236,29 +242,43 @@ public class WdpCustomItems extends JavaPlugin {
         getServer().addRecipe(recipe);
     }
 
-    public void registerNetheriteBeamSwordUpgradeRecipe(){
+    public void registerNetheriteBeamSwordUpgradeRecipe() {
+        // Config values for the upgraded sword
         int damage = getConfig().getInt("netherite-beam-sword.damage", 20);
-        String color = getConfig().getString("netherite-beam-sword.knockback", "RED");
-        int knockback = getConfig().getInt("netherite-beam-sword.knockback", 5);
+        String color = getConfig().getString("netherite-beam-sword.color", "DARK_PURPLE");
+        double knockback = getConfig().getDouble("netherite-beam-sword.knockback", 5.0);
         long cooldown = getConfig().getLong("netherite-beam-sword.cooldown", 4);
-        ItemStack diaBeamSword = createCustomBeamSword();
+        double range = getConfig().getDouble("netherite-beam-sword.range", 60.0);
 
-        NamespacedKey key = new NamespacedKey(this, "netheriteBeamSwordRecipe");
+        // Unique key for the recipe
+        NamespacedKey key = new NamespacedKey(this, "netherite_beam_sword_upgrade");
 
-        RecipeChoice template = new RecipeChoice.MaterialChoice(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE);
+        // 1. Create the diamond beam sword for matching (must match exactly)
+        ItemStack baseItem = new ItemStack(Material.DIAMOND_SWORD);
+        ItemMeta baseMeta = baseItem.getItemMeta();
+        if (baseMeta != null) {
+            baseMeta.getPersistentDataContainer().set(diaBeamSwordKey, PersistentDataType.BYTE, (byte) 1);
+            baseItem.setItemMeta(baseMeta);
+        }
 
-        RecipeChoice base = new RecipeChoice.ExactChoice()
+        // 2. Create the resulting netherite beam sword
+        ItemStack result = createCustomBeamSword(damage, color, knockback, cooldown, range, Material.NETHERITE_SWORD);
 
-        RecipeChoice addition = new RecipeChoice.MaterialChoice(Material.BLAZE_POWDER);
+        // 3. Build smithing transform recipe
+        SmithingTransformRecipe recipe = new SmithingTransformRecipe(
+                key,
+                result,
+                new RecipeChoice.MaterialChoice(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE),
+                new RecipeChoice.ExactChoice(baseItem), // Requires exact PDC
+                new RecipeChoice.MaterialChoice(Material.NETHERITE_INGOT)
+        );
 
-        // Result (Custom Fire Sword)
-        ItemStack result = ;
-        // (You can add custom NBT here if needed)
+        // 4. Register the recipe with the server
+        Bukkit.addRecipe(recipe);
 
-        SmithingTransformRecipe recipe = new SmithingTransformRecipe(key, result, template, base, addition);
-        getServer().addRecipe(recipe);
-
+        getLogger().info("✅ Registered Netherite Beam Sword upgrade recipe");
     }
+
 
     public void registerBeamStoneRecipe() {
         ItemStack result = createBeamStone();
