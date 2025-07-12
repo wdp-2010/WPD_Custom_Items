@@ -107,11 +107,6 @@ public class WdpCustomItems extends JavaPlugin {
         getLogger().info("WDP Custom Items disabled.");
     }
 
-    private boolean isBeamSword(ItemStack item) {
-        if (item == null || !item.hasItemMeta()) return false;
-        return item.getItemMeta().getPersistentDataContainer().has(diaBeamSwordKey, PersistentDataType.BYTE);
-    }
-
     public ItemStack createCustomBeamSword(int damage, String color, double knockback, long cooldown, double range, Material material) {
         ItemStack sword = new ItemStack(material);
         ItemMeta meta = sword.getItemMeta();
