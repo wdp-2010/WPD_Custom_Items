@@ -81,6 +81,7 @@ public class GraplingHandeler implements Listener {
             boolean returning = false;
             boolean grabbedSomething = false;
             Entity hookedEntity = null;
+            double range = plugin.getConfig().getDouble("grappling-hook.range", 50);
 
             @Override
             public void run() {
@@ -119,7 +120,7 @@ public class GraplingHandeler implements Listener {
                         }
                     }
 
-                    if (step > 20) {
+                    if (step > range) {
                         finishCooldown(grabbedSomething);
                         cancel();
                         return;

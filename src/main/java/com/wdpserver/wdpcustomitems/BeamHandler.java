@@ -68,8 +68,8 @@ public class BeamHandler implements Listener {
 
         Location start = player.getEyeLocation();
         Vector direction = start.getDirection().normalize();
-        int particleSpeed = plugin.getConfig().getInt("beam-speed", 1);
-        double maxDistance = plugin.getConfig().getDouble("range", 50.0);
+        int particleSpeed = plugin.getConfig().getInt("diamond-beam-sword.speed", 1);
+        double maxDistance = beamSword.range;
 
         boolean hasBolt = Arrays.stream(player.getInventory().getContents()).anyMatch(this::isBolt);
 
@@ -93,7 +93,7 @@ public class BeamHandler implements Listener {
             @Override
             public void run() {
                 if (i >= particles || hitBlock) {
-                    long cooldown = hasHitEntity ? plugin.longCooldownTimeMs : plugin.shortCooldownTimeMs;
+                    long cooldown = hasHitEntity ? beamSword.cooldown : plugin.shortCooldownTimeMs;
 
                     plugin.cooldowns.put(playerId, System.currentTimeMillis());
                     plugin.beamCooldownDurations.put(playerId, cooldown);

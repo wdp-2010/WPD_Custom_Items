@@ -82,8 +82,10 @@ public class DoubleJumpHandler implements Listener {
             player.setAllowFlight(false); // Disable flight immediately
             canDoubleJump.put(uuid, false); // Mark that jump was used
 
+
+            double velocityY = plugin.getConfig().getDouble("double-jump-boots.velocity", 1);
             Vector velocity = player.getLocation().getDirection().multiply(0.5);
-            velocity.setY(1.0);
+            velocity.setY(velocityY);
             player.setVelocity(velocity);
         }
     }

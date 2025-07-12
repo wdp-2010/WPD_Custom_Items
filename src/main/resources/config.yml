@@ -1,13 +1,31 @@
 # WDP Custom Items Config
-beam-sword:
-  damage: 15
+diamond-beam-sword:
+  damage: 12
   knockback: 3
-  cooldown: 5.0
+  cooldown: 5
   color: RED # default color
   short-cooldown: 1.0 # If nothing gets hit
   speed: 1 # Ticks between next step: step = distance / particle (50)
   range: 50.0 # Distance
 
+netherite-beam-sword:
+  damage: 20
+  knockback: 5
+  cooldown: 4
+  color: RED # default color
+  short-cooldown: 1.0 # If nothing gets hit
+  speed: 2 # Ticks between next step: step = distance / particle (50)
+  range: 30.0 # Distance
+
+bolt:
+  fire-ticks: 80 # 20 ticks are 1 sec
+
+double-jump-boots:
+  velocity: 1 # Amount of Y velocity for jump
+
 grappling-hook:
-  short-cooldown: 1.0 # Invalid, using beam-sword.short cooldown
+  short-cooldown: 1.0 # Invalid, using beam-sword.short-cooldown
   cooldown: 5.0
+  range: 20 # Block of range
+
+

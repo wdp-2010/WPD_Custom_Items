@@ -10,6 +10,9 @@ public class BeamSword {
     public int damage;
     public Color color;
     public double knockback;
+    public double range;
+    public long cooldown;
+
 
     public BeamSword(ItemStack item, WdpCustomItems plugin) {
         ItemMeta meta = item.getItemMeta();
@@ -25,5 +28,9 @@ public class BeamSword {
         }
 
         this.knockback = container.getOrDefault(plugin.beamKnockbackKey, PersistentDataType.DOUBLE, 1.5);
+
+        this.range = container.getOrDefault(plugin.beamRangeKey, PersistentDataType.DOUBLE, 50.0);
+
+        this.cooldown = container.getOrDefault(plugin.beamCooldownKey, PersistentDataType.LONG, (long) 5);
     }
 }

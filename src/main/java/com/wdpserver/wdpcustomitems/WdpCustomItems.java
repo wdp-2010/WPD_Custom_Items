@@ -1,12 +1,10 @@
 package com.wdpserver.wdpcustomitems;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.boss.BossBar;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.RecipeChoice;
-import org.bukkit.inventory.ShapedRecipe;
-import org.bukkit.inventory.ShapelessRecipe;
+import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -23,6 +21,8 @@ public class WdpCustomItems extends JavaPlugin {
     public NamespacedKey throwStoneKey;
     public NamespacedKey jumpBootsKey;
     public NamespacedKey grapplingKey;
+    public NamespacedKey beamRangeKey;
+    public NamespacedKey beamCooldownKey;
 
     public final Map<UUID, Boolean> hasBeam = new HashMap<>();
     public final Map<UUID, Long> cooldowns = new HashMap<>();
@@ -37,6 +37,7 @@ public class WdpCustomItems extends JavaPlugin {
     public long longCooldownTimeMsGrappling;
 
     private RecipeManager recipeManager;
+
 
     @Override
     public void onEnable() {
@@ -61,6 +62,8 @@ public class WdpCustomItems extends JavaPlugin {
         beamDamageKey = new NamespacedKey(this, "beam_damage");
         beamColorKey = new NamespacedKey(this, "beam_color");
         beamKnockbackKey = new NamespacedKey(this, "beam_knockback");
+        beamCooldownKey = new NamespacedKey(this, "beamdefcooldown");
+        beamRangeKey= new NamespacedKey(this, "beamrange");
         beamStoneKey = new NamespacedKey(this, "beamstone");
         throwStoneKey = new NamespacedKey(this, "throwstone");
         jumpBootsKey = new NamespacedKey(this, "doublejumpboots");
@@ -72,7 +75,7 @@ public class WdpCustomItems extends JavaPlugin {
 
         // Register the recipe here
         registerBoltRecipe();
-        registerBeamSwordRecipe();
+        registerDiaBeamSwordRecipe();
         registerBeamStoneRecipe();
         registerThrowStoneRecipe();
         registerJumpBootsRecipe();
@@ -103,8 +106,8 @@ public class WdpCustomItems extends JavaPlugin {
         getLogger().info("WDP Custom Items disabled.");
     }
 
-    public ItemStack createCustomBeamSword(int damage, String color, double knockback, long cooldown) {
-        ItemStack sword = new ItemStack(Material.DIAMOND_SWORD);
+    public ItemStack createCustomBeamSword(int damage, String color, double knockback, long cooldown, double range, Material material) {
+        ItemStack sword = new ItemStack(material);
         ItemMeta meta = sword.getItemMeta();
 
         meta.setDisplayName("§bBeam Sword");
@@ -112,6 +115,8 @@ public class WdpCustomItems extends JavaPlugin {
         meta.getPersistentDataContainer().set(beamDamageKey, PersistentDataType.INTEGER, damage);
         meta.getPersistentDataContainer().set(beamColorKey, PersistentDataType.STRING, color);
         meta.getPersistentDataContainer().set(beamKnockbackKey, PersistentDataType.DOUBLE, knockback);
+        meta.getPersistentDataContainer().set(beamRangeKey, PersistentDataType.DOUBLE, range);
+        meta.getPersistentDataContainer().set(beamCooldownKey, PersistentDataType.LONG, cooldown);
 
         meta.setItemModel(new NamespacedKey("wdpserver","beam_sword"));
 
@@ -119,7 +124,9 @@ public class WdpCustomItems extends JavaPlugin {
                 "§fBeam:",
                 "§7Damage: §f" + damage,
                 "§7Color: §f" + color,
-                "§7Knockback: §f" + knockback
+                "§7Knockback: §f" + knockback,
+                "§7Cooldown: §f" + cooldown + " s",
+                "§7Range: §f" + range + " Blocks"
         ));
 
         sword.setItemMeta(meta);
@@ -200,15 +207,16 @@ public class WdpCustomItems extends JavaPlugin {
 
         getServer().addRecipe(recipe);
     }
-    public void registerBeamSwordRecipe() {
-        int damage = getConfig().getInt("beam-sword.damage", 10);
-        String color = getConfig().getString("beam-sword.knockback", "RED");
-        int knockback = getConfig().getInt("beam-sword.knockback", 3);
-        long cooldown = getConfig().getLong("beam-sword.cooldown", 3);
+    public void registerDiaBeamSwordRecipe() {
+        int damage = getConfig().getInt("diamond-beam-sword.damage", 12);
+        String color = getConfig().getString("diamond-beam-sword.color", "RED");
+        int knockback = getConfig().getInt("diamond-beam-sword.knockback", 3);
+        long cooldown = getConfig().getLong("diamond-beam-sword.cooldown", 5);
+        double range = getConfig().getDouble("diamond-beam-sword.range", 50);
 
         NamespacedKey key = this.beamSwordKey;
 
-        ItemStack result = createCustomBeamSword(damage, color, knockback, cooldown);  //  config
+        ItemStack result = createCustomBeamSword(damage, color, knockback, cooldown, range, Material.DIAMOND_SWORD);  //  config
         ItemStack beamStone = createBeamStone();
         ShapedRecipe recipe = new ShapedRecipe(key, result);
 
@@ -226,6 +234,30 @@ public class WdpCustomItems extends JavaPlugin {
         recipeManager.registerRecipe("Beam Sword", key, recipe);
 
         getServer().addRecipe(recipe);
+    }
+
+    public void registerNetheriteBeamSwordUpgradeRecipe(){
+        int damage = getConfig().getInt("netherite-beam-sword.damage", 20);
+        String color = getConfig().getString("netherite-beam-sword.knockback", "RED");
+        int knockback = getConfig().getInt("netherite-beam-sword.knockback", 5);
+        long cooldown = getConfig().getLong("netherite-beam-sword.cooldown", 4);
+        ItemStack diaBeamSword = createCustomBeamSword();
+
+        NamespacedKey key = new NamespacedKey(this, "netheriteBeamSwordRecipe");
+
+        RecipeChoice template = new RecipeChoice.MaterialChoice(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE);
+
+        RecipeChoice base = new RecipeChoice.ExactChoice()
+
+        RecipeChoice addition = new RecipeChoice.MaterialChoice(Material.BLAZE_POWDER);
+
+        // Result (Custom Fire Sword)
+        ItemStack result = ;
+        // (You can add custom NBT here if needed)
+
+        SmithingTransformRecipe recipe = new SmithingTransformRecipe(key, result, template, base, addition);
+        getServer().addRecipe(recipe);
+
     }
 
     public void registerBeamStoneRecipe() {
