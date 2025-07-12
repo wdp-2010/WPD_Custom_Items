@@ -63,7 +63,7 @@ public class WdpCustomItems extends JavaPlugin {
         beamKnockbackKey = new NamespacedKey(this, "beam_knockback");
         beamStoneKey = new NamespacedKey(this, "beamstone");
         throwStoneKey = new NamespacedKey(this, "throwstone");
-        jumpBootsKey = new NamespacedKey(this, "dubblejumpboots");
+        jumpBootsKey = new NamespacedKey(this, "doublejumpboots");
         grapplingKey = new NamespacedKey(this, "grapplinghook");
 
         longCooldownTimeMs = (long) (getConfig().getDouble("beam-sword.cooldown", 5.0) * 1000);
@@ -81,7 +81,7 @@ public class WdpCustomItems extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new BeamHandler(this), this);
         getServer().getPluginManager().registerEvents(new RecolorCraftHandler(this), this);
         getServer().getPluginManager().registerEvents(new ThrowHandeler(this), this);
-        getServer().getPluginManager().registerEvents(new DubbleJumpHandler(this), this);
+        getServer().getPluginManager().registerEvents(new DoubleJumpHandler(this), this);
         getServer().getPluginManager().registerEvents(new GraplingHandeler(this), this);
         getServer().getPluginManager().registerEvents(recipeCommand, this);
 
@@ -155,8 +155,8 @@ public class WdpCustomItems extends JavaPlugin {
         ItemMeta meta = jumpBoots.getItemMeta();
 
         meta.getPersistentDataContainer().set(jumpBootsKey, PersistentDataType.BYTE, (byte) 1);
-        meta.setDisplayName("§bDubble Jump Boots");
-        meta.setLore(Arrays.asList("§fJump once on air","§fpress space twice to dubble jump"));
+        meta.setDisplayName("§bDouble Jump Boots");
+        meta.setLore(Arrays.asList("§fJump once on air","§fpress space twice to duoule jump"));
 
         jumpBoots.setItemMeta(meta);
         return jumpBoots;

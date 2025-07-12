@@ -17,13 +17,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class DubbleJumpHandler implements Listener {
+public class DoubleJumpHandler implements Listener {
 
     private final Map<UUID, Boolean> canDoubleJump = new HashMap<>();
 
     private final WdpCustomItems plugin;
 
-    public DubbleJumpHandler(WdpCustomItems plugin) {
+    public DoubleJumpHandler(WdpCustomItems plugin) {
         this.plugin = plugin;
     }
 
