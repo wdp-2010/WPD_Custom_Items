@@ -40,24 +40,14 @@ public class RecolorCraftHandler implements Listener {
             // Not our recipe
             return;
         }
-
-        // Clone the sword to preserve NBT
-        ItemStack newSword = sword.clone();
-        ItemMeta meta = newSword.getItemMeta();
-
+        int damage = plugin.getConfig().getInt("diamond-beam-sword.damage", 12);
+        int knockback = plugin.getConfig().getInt("diamond-beam-sword.knockback", 3);
+        long cooldown = plugin.getConfig().getLong("diamond-beam-sword.cooldown", 5);
+        double range = plugin.getConfig().getDouble("diamond-beam-sword.range", 50);
         String dyeColor = getColorFromDye(dye);
 
-        // Update the color NBT
-        meta.getPersistentDataContainer().set(plugin.beamColorKey, PersistentDataType.STRING, dyeColor);
-
-        // Update lore
-        meta.setLore(java.util.Arrays.asList(
-                "§7Damage: §f" + meta.getPersistentDataContainer().get(plugin.beamDamageKey, PersistentDataType.INTEGER),
-                "§7Color: §f" + dyeColor,
-                "§7Knockback: §f" + meta.getPersistentDataContainer().get(plugin.beamKnockbackKey, PersistentDataType.DOUBLE)
-        ));
-
-        newSword.setItemMeta(meta);
+        // Clone the sword to preserve NBT
+        ItemStack newSword = plugin.createCustomBeamSword(damage, dyeColor, knockback, cooldown, range, Material.DIAMOND_SWORD);
 
         inv.setResult(newSword);
     }
@@ -69,7 +59,7 @@ public class RecolorCraftHandler implements Listener {
             case GREEN_DYE: return "GREEN";
             case YELLOW_DYE: return "YELLOW";
             case PURPLE_DYE: return "PURPLE";
-            default: return "WHITE";
+            default: return "RED";
         }
     }
 }
