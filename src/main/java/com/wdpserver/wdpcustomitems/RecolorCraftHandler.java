@@ -27,8 +27,8 @@ public class RecolorCraftHandler implements Listener {
         for (ItemStack item : contents) {
             if (item == null) continue;
 
-            if (item.getType() == Material.DIAMOND_SWORD) {
-                if (item.hasItemMeta() && item.getItemMeta().getPersistentDataContainer().has(plugin.diaBeamSwordKey, PersistentDataType.BYTE)) {
+            if (item.getType() == Material.DIAMOND_SWORD || item.getType() == Material.NETHERITE_SWORD) {
+                if (item.hasItemMeta() && (item.getItemMeta().getPersistentDataContainer().has(plugin.diaBeamSwordKey, PersistentDataType.BYTE) || item.getItemMeta().getPersistentDataContainer().has(plugin.netheriteBeamSwordKey, PersistentDataType.BYTE))) {
                     sword = item;
                 }
             } else if (item.getType().name().endsWith("_DYE")) {
