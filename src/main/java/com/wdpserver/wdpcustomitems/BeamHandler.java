@@ -40,10 +40,12 @@ public class BeamHandler implements Listener {
 
         long now = System.currentTimeMillis();
 
+        BeamSword beamSword = new BeamSword(item, plugin);
+
         // Check cooldown based on actual duration used
         if (plugin.cooldowns.containsKey(playerId)) {
             long last = plugin.cooldowns.get(playerId);
-            long duration = plugin.beamCooldownDurations.getOrDefault(playerId, plugin.longCooldownTimeMs);
+            long duration = plugin.beamCooldownDurations.getOrDefault(playerId, beamSword.cooldown);
             long elapsed = now - last;
 
             if (elapsed < duration) {
@@ -63,8 +65,6 @@ public class BeamHandler implements Listener {
             player.sendMessage("You have a beam, you must wait a moment");
             return;
         }
-
-        BeamSword beamSword = new BeamSword(item, plugin);
 
         Location start = player.getEyeLocation();
         Vector direction = start.getDirection().normalize();
@@ -128,7 +128,7 @@ public class BeamHandler implements Listener {
                 plugin.hasBeam.put(playerId, true);
 
                 if (point.getBlock().getType().isSolid()) {
-                    long cooldown = hasHitEntity ? plugin.longCooldownTimeMs : plugin.shortCooldownTimeMs;
+                    long cooldown = hasHitEntity ? beamSword.cooldown : plugin.shortCooldownTimeMs;
 
                     plugin.cooldowns.put(playerId, System.currentTimeMillis());
                     plugin.beamCooldownDurations.put(playerId, cooldown);
@@ -195,12 +195,10 @@ public class BeamHandler implements Listener {
         ItemStack newItem = player.getInventory().getItem(event.getNewSlot());
         boolean holdingSword = false;
 
-        if (newItem != null && newItem.getType() == Material.DIAMOND_SWORD && newItem.hasItemMeta()) {
-            ItemMeta meta = newItem.getItemMeta();
-            if (meta.getPersistentDataContainer().has(plugin.diaBeamSwordKey, PersistentDataType.BYTE)) {
-                holdingSword = true;
-            }
-        }
+        BeamSword beamSword = new BeamSword(newItem, plugin);
+
+
+        if (beamSword.isBeamSword) holdingSword = true;
 
         if (!holdingSword) {
             BossBar cooldownBar = plugin.cooldownBars.get(playerId);

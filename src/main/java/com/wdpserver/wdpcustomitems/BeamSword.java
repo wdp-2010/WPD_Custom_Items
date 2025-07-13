@@ -1,6 +1,7 @@
 package com.wdpserver.wdpcustomitems;
 
 import org.bukkit.Color;
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -12,6 +13,7 @@ public class BeamSword {
     public double knockback;
     public double range;
     public long cooldown;
+    public boolean isBeamSword;
 
 
     public BeamSword(ItemStack item, WdpCustomItems plugin) {
@@ -32,5 +34,11 @@ public class BeamSword {
         this.range = container.getOrDefault(plugin.beamRangeKey, PersistentDataType.DOUBLE, 50.0);
 
         this.cooldown = container.getOrDefault(plugin.beamCooldownKey, PersistentDataType.LONG, (long) 5);
+
+        if (item.getType() == Material.DIAMOND_SWORD || item.getType() == Material.NETHERITE_SWORD) {
+            if (item.getItemMeta().getPersistentDataContainer().has(plugin.netheriteBeamSwordKey) || item.getItemMeta().getPersistentDataContainer().has(plugin.diaBeamSwordKey)) {
+                isBeamSword = true;
+            } else isBeamSword = false;
+        } else isBeamSword = false;
     }
 }
