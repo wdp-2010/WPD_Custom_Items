@@ -11,6 +11,7 @@ discord: https://discord.gg/zcaW6QPG89
 
 ## beam sword
 **beam config:**
+ - color
  - damage
  - knockback
  - cooldown
@@ -19,6 +20,18 @@ discord: https://discord.gg/zcaW6QPG89
 **ability:**
 - bolt: spawn lightning at target!
 - color: change your color of the beam with dye!
+- netherite: upgrade your diamond beam sword to a netherite one to get a better beam and upgrades
+
+**upgrades (netherite only)**
+ - COMMING SOON 
+
+## grappling hook
+**config:**
+ - cooldown (short is using diamond-beam-sword.short-cooldown)
+ - range
+
+**abilities:**
+ - grabs an entity and pulls it towards you 
 
 ## throw stone
 **ability:**
@@ -27,3 +40,6 @@ discord: https://discord.gg/zcaW6QPG89
 ## double jump boots
 **ability:**
 - jump in the air by pressing space twice on air 
+
+**commands:**
+ - /recipes [Item Name] : show the recipe of a custom item in a neat invertory
