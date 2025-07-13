@@ -14,7 +14,6 @@ netherite-beam-sword:
   cooldown: 4
   color: RED # default color
   short-cooldown: 1.0 # If nothing gets hit
-  speed: 2 # Ticks between next step: step = distance / particle (50)
   range: 30.0 # Distance
 
 bolt:

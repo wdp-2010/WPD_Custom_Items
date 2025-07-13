@@ -30,7 +30,7 @@ public class BeamHandler implements Listener {
         UUID playerId = player.getUniqueId();
 
         ItemStack item = event.getItem();
-        if (item == null || (item.getType() != Material.DIAMOND_SWORD && !item.hasItemMeta() || item.getType() != Material.NETHERITE_SWORD)) return;
+        if (item == null || (item.getType() != Material.DIAMOND_SWORD && !item.hasItemMeta() || item.getType() != Material.NETHERITE_SWORD && !item.hasItemMeta())) return;
 
         ItemMeta meta = item.getItemMeta();
         if (!meta.getPersistentDataContainer().has(plugin.diaBeamSwordKey, PersistentDataType.BYTE) && !meta.getPersistentDataContainer().has(plugin.netheriteBeamSwordKey, PersistentDataType.BYTE)) return;

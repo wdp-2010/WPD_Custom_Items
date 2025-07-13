@@ -33,7 +33,10 @@ public class BeamSword {
 
         this.range = container.getOrDefault(plugin.beamRangeKey, PersistentDataType.DOUBLE, 50.0);
 
-        this.cooldown = container.getOrDefault(plugin.beamCooldownKey, PersistentDataType.LONG, (long) 5);
+        // Load cooldown as seconds but convert to milliseconds
+        long cooldownSeconds = container.getOrDefault(plugin.beamCooldownKey, PersistentDataType.LONG, 5L);
+        this.cooldown = cooldownSeconds * 1000L;
+
 
         if (item.getType() == Material.DIAMOND_SWORD || item.getType() == Material.NETHERITE_SWORD) {
             if (item.getItemMeta().getPersistentDataContainer().has(plugin.netheriteBeamSwordKey) || item.getItemMeta().getPersistentDataContainer().has(plugin.diaBeamSwordKey)) {

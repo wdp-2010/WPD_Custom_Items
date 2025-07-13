@@ -36,7 +36,6 @@ public class WdpCustomItems extends JavaPlugin {
     public Map<UUID, Long> beamCooldownDurations = new HashMap<>();
     public Map<UUID, Boolean> hasGrappling = new HashMap<>();
 
-    public long longCooldownTimeMs;
     public long shortCooldownTimeMs;
     public long longCooldownTimeMsGrappling;
 
@@ -74,8 +73,7 @@ public class WdpCustomItems extends JavaPlugin {
         jumpBootsKey = new NamespacedKey(this, "doublejumpboots");
         grapplingKey = new NamespacedKey(this, "grapplinghook");
 
-        longCooldownTimeMs = (long) (getConfig().getDouble("beam-sword.cooldown", 5.0) * 1000);
-        shortCooldownTimeMs = (long) (getConfig().getDouble("beam-sword.short-cooldown", 2.0) * 1000);
+        shortCooldownTimeMs = (long) (getConfig().getDouble("diamondbeam-sword.short-cooldown", 1.0) * 1000);
         longCooldownTimeMsGrappling = (long) (getConfig().getDouble("grappling-hook.cooldown", 5.0) * 1000);
 
         // Register the recipe here
