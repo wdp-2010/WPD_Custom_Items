@@ -29,12 +29,6 @@ public class ThrowHandeler implements Listener {
         Player player = event.getPlayer();
         Action action = event.getAction();
 
-        if (event.getHand() != EquipmentSlot.HAND) {
-            player.sendMessage("No Throwstone in offhand");
-            event.setCancelled(true);
-            return;
-        }
-
         if (action != Action.RIGHT_CLICK_AIR && action != Action.RIGHT_CLICK_BLOCK) return;
 
         ItemStack item = event.getItem();
@@ -44,6 +38,12 @@ public class ThrowHandeler implements Listener {
         if (!meta.getPersistentDataContainer().has(plugin.throwStoneKey, PersistentDataType.BYTE)) return;
 
         event.setCancelled(true);
+
+        if (event.getHand() != EquipmentSlot.HAND) {
+            player.sendMessage("No Throwstone in offhand");
+            event.setCancelled(true);
+            return;
+        }
 
         // Consume item
         if (item.getAmount() > 1) {
