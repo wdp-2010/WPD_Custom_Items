@@ -27,6 +27,7 @@ public class WdpCustomItems extends JavaPlugin {
     public NamespacedKey grapplingKey;
     public NamespacedKey beamRangeKey;
     public NamespacedKey beamCooldownKey;
+    public NamespacedKey catapultKey;
 
     public final Map<UUID, Boolean> hasBeam = new HashMap<>();
     public final Map<UUID, Long> cooldowns = new HashMap<>();
@@ -72,6 +73,7 @@ public class WdpCustomItems extends JavaPlugin {
         throwStoneKey = new NamespacedKey(this, "throwstone");
         jumpBootsKey = new NamespacedKey(this, "doublejumpboots");
         grapplingKey = new NamespacedKey(this, "grapplinghook");
+        catapultKey = new NamespacedKey(this, "catapult");
 
         shortCooldownTimeMs = (long) (getConfig().getDouble("diamondbeam-sword.short-cooldown", 1.0) * 1000);
         longCooldownTimeMsGrappling = (long) (getConfig().getDouble("grappling-hook.cooldown", 5.0) * 1000);
@@ -142,6 +144,20 @@ public class WdpCustomItems extends JavaPlugin {
         sword.setItemMeta(meta);
         return sword;
     }
+    public ItemStack createCatapult() {
+        ItemStack bow = new ItemStack(Material.BOW);
+        ItemMeta meta = bow.getItemMeta();
+
+        meta.setMaxStackSize(32);
+        meta.setDisplayName("§bCatapult");
+        meta.setLore(Arrays.asList("§fLaunch a block", "§fPlace the block where it lands"));
+        meta.getPersistentDataContainer().set(catapultKey, PersistentDataType.BYTE, (byte) 1);
+
+        bow.setItemMeta(meta);
+        return bow;
+
+    }
+
     public ItemStack createThrowRock() {
         ItemStack ThrowRock = new ItemStack(Material.COBBLESTONE);
         ItemMeta meta = ThrowRock.getItemMeta();
@@ -242,6 +258,28 @@ public class WdpCustomItems extends JavaPlugin {
         recipe.setIngredient('S', Material.DIAMOND_SWORD);
 
         recipeManager.registerRecipe("Beam Sword", key, recipe);
+
+        getServer().addRecipe(recipe);
+    }
+
+    public void registerCatapultRecipe() {
+        ItemStack result = createCatapult();
+
+        NamespacedKey key = this.catapultKey;
+
+        ShapedRecipe recipe = new ShapedRecipe(key, result);
+
+        // Define shape: example shape, you can adjust (DONE)
+        recipe.shape(
+                "DDD",
+                "DBD",
+                "DDD"
+        );
+
+        recipe.setIngredient('D', Material.DIAMOND);
+        recipe.setIngredient('B', Material.BOW);
+
+        recipeManager.registerRecipe("Catapult", key, recipe);
 
         getServer().addRecipe(recipe);
     }
