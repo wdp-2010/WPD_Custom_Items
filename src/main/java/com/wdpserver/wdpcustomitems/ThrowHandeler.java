@@ -10,6 +10,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -27,6 +28,12 @@ public class ThrowHandeler implements Listener {
     public void onRightClick(PlayerInteractEvent event) {
         Player player = event.getPlayer();
         Action action = event.getAction();
+
+        if (event.getHand() != EquipmentSlot.HAND) {
+            player.sendMessage("No Throwstone in offhand");
+            event.setCancelled(true);
+            return;
+        }
 
         if (action != Action.RIGHT_CLICK_AIR && action != Action.RIGHT_CLICK_BLOCK) return;
 
