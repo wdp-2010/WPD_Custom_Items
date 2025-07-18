@@ -85,6 +85,7 @@ public class WdpCustomItems extends JavaPlugin {
         registerThrowStoneRecipe();
         registerJumpBootsRecipe();
         registerGrapplingHookRecipe();
+        registerCatapultRecipe();
 
         getServer().getPluginManager().registerEvents(new BeamHandler(this), this);
         getServer().getPluginManager().registerEvents(new RecolorCraftHandler(this), this);
@@ -92,6 +93,7 @@ public class WdpCustomItems extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new DoubleJumpHandler(this), this);
         getServer().getPluginManager().registerEvents(new GraplingHandeler(this), this);
         getServer().getPluginManager().registerEvents(new SwordCraftUpgrade(this), this);
+        getServer().getPluginManager().registerEvents(new CatapultHandeler(this), this);
         getServer().getPluginManager().registerEvents(recipeCommand, this);
 
 
