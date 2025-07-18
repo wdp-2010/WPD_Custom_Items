@@ -15,6 +15,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Transformation;
@@ -38,6 +40,7 @@ public class CatapultHandeler implements Listener {
     public void onShoot(EntityShootBowEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
         ItemStack bow = event.getBow();
+        ItemMeta meta = bow.getItemMeta();
         if (bow == null) return;
 
         if (!bow.getItemMeta()
@@ -49,6 +52,21 @@ public class CatapultHandeler implements Listener {
             player.sendMessage("You need a block in offhand!");
             event.setCancelled(true);
             return;
+        }
+
+        if (meta instanceof Damageable damageable) {
+            int damage = damageable.getDamage();
+            int maxDurability = bow.getType().getMaxDurability();
+
+            damage += 2; // increase damage by 2
+
+            if (damage >= maxDurability) {
+                player.getInventory().remove(bow);
+                player.sendMessage(ChatColor.RED + "Your catapult bow broke!");
+            } else {
+                damageable.setDamage(damage);
+                bow.setItemMeta((ItemMeta) damageable);
+            }
         }
 
         Arrow arrow = (Arrow) event.getProjectile();
