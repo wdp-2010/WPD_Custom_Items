@@ -28,6 +28,8 @@ public class WdpCustomItems extends JavaPlugin {
     public NamespacedKey beamRangeKey;
     public NamespacedKey beamCooldownKey;
     public NamespacedKey catapultKey;
+    public NamespacedKey ghastHarnessKey;
+    public NamespacedKey harnessAppliedKey;
 
     public final Map<UUID, Boolean> hasBeam = new HashMap<>();
     public final Map<UUID, Long> cooldowns = new HashMap<>();
@@ -74,6 +76,8 @@ public class WdpCustomItems extends JavaPlugin {
         jumpBootsKey = new NamespacedKey(this, "doublejumpboots");
         grapplingKey = new NamespacedKey(this, "grapplinghook");
         catapultKey = new NamespacedKey(this, "catapult");
+        ghastHarnessKey    = new NamespacedKey(this, "ghast_harness");
+        harnessAppliedKey  = new NamespacedKey(this, "harness_applied");
 
         shortCooldownTimeMs = (long) (getConfig().getDouble("diamondbeam-sword.short-cooldown", 1.0) * 1000);
         longCooldownTimeMsGrappling = (long) (getConfig().getDouble("grappling-hook.cooldown", 5.0) * 1000);
@@ -106,6 +110,8 @@ public class WdpCustomItems extends JavaPlugin {
         getCommand("recipes").setExecutor(recipeCommand);
 
         getLogger().info("WDP Custom Items started!");
+
+        new GhastHarnessHandler(this, ghastHarnessKey, harnessAppliedKey);
     }
 
 
