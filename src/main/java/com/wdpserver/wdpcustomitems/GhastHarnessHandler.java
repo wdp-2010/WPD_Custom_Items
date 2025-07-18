@@ -1,83 +1,70 @@
 package com.wdpserver.wdpcustomitems;
 
-import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
-import org.bukkit.attribute.AttributeModifier;
-import org.bukkit.attribute.AttributeModifier.Operation;
 import org.bukkit.entity.Ghast;
+import org.bukkit.entity.HappyGhast;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.Collection;
-
-/**
- * Handles applying a custom Ghast harness item to Ghasts and boosting their speed.
- */
 public class GhastHarnessHandler implements Listener {
-    private final NamespacedKey harnessItemKey;
-    private final NamespacedKey harnessEntityKey;
-    private final NamespacedKey speedModifierKey;
+    private final WdpCustomItems plugin;
 
-    /**
-     * @param plugin             your main JavaPlugin instance
-     * @param harnessItemKey     key used on the ItemStack to mark the harness
-     * @param harnessEntityKey   key used on the Ghast to mark it as harnessed
-     */
-    public GhastHarnessHandler(JavaPlugin plugin, NamespacedKey harnessItemKey, NamespacedKey harnessEntityKey) {
-        this.harnessItemKey = harnessItemKey;
-        this.harnessEntityKey = harnessEntityKey;
-        this.speedModifierKey = new NamespacedKey(plugin, "happy_ghast_harness_speed");
-        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+    public GhastHarnessHandler(WdpCustomItems plugin) {
+        this.plugin = plugin;
     }
 
     @EventHandler
     public void onPlayerInteractGhast(PlayerInteractEntityEvent event) {
-        if (!(event.getRightClicked() instanceof Ghast ghast)) return;
         Player player = event.getPlayer();
-        ItemStack inHand = player.getInventory().getItemInMainHand();
-        if (inHand == null || !inHand.hasItemMeta()) return;
+        plugin.getLogger().info("InteractEntityEvent: " + player.getName() + " clicked target " + event.getRightClicked().getType());
 
-        ItemMeta meta = inHand.getItemMeta();
-        PersistentDataContainer dc = meta.getPersistentDataContainer();
-        // Only proceed if this is our harness
-        if (!dc.has(harnessItemKey, PersistentDataType.BYTE)) return;
+        if (!(event.getRightClicked() instanceof HappyGhast ghast)) {
+            plugin.getLogger().info("InteractEntityEvent: Target is not a Happy Ghast. Ignoring.");
+            return;
+        }
+        plugin.getLogger().info("InteractEntityEvent: Happy Ghast detected.");
+
+        ItemStack inHand = player.getInventory().getItemInMainHand();
+        if (inHand == null || !inHand.hasItemMeta()) {
+            plugin.getLogger().info("InteractEntityEvent: No item or no meta in hand.");
+            return;
+        }
+
+        PersistentDataContainer dc = inHand.getItemMeta().getPersistentDataContainer();
+        boolean hasHarnessTag = dc.has(plugin.ghastHarnessKey, PersistentDataType.BYTE);
+        plugin.getLogger().info("Item in hand has harness tag? " + hasHarnessTag);
+        if (!hasHarnessTag) return;
 
         PersistentDataContainer edc = ghast.getPersistentDataContainer();
-        if (edc.has(harnessEntityKey, PersistentDataType.BYTE)) {
+        if (edc.has(plugin.harnessAppliedKey, PersistentDataType.BYTE)) {
+            plugin.getLogger().info("Ghast already harnessed. Sending message to player.");
             player.sendMessage("§cThis Ghast is already harnessed.");
             return;
         }
 
-        // Mark the Ghast as harnessed
-        edc.set(harnessEntityKey, PersistentDataType.BYTE, (byte)1);
+        // Mark harnessed
+        edc.set(plugin.harnessAppliedKey, PersistentDataType.BYTE, (byte)1);
+        plugin.getLogger().info("Harness tag applied to Ghast.");
 
-        // Apply speed boost using key-based AttributeModifier
-        AttributeInstance moveAttr = ghast.getAttribute(Attribute.MOVEMENT_SPEED);
-        if (moveAttr != null) {
-            Collection<AttributeModifier> existing = moveAttr.getModifiers();
-            boolean hasMod = existing.stream()
-                    .anyMatch(mod -> mod.key().equals(speedModifierKey));
-            if (!hasMod) {
-                AttributeModifier speedMod = new AttributeModifier(
-                        speedModifierKey,
-                        0.5,
-                        Operation.MULTIPLY_SCALAR_1
-                );
-                moveAttr.addModifier(speedMod);
-            }
+        // Set base flying speed to 0.1 (double default)
+        AttributeInstance flyAttr = ghast.getAttribute(Attribute.FLYING_SPEED);
+        if (flyAttr != null) {
+            flyAttr.setBaseValue(0.1);
+            plugin.getLogger().info("Ghast base flying speed set to 0.1.");
+        } else {
+            plugin.getLogger().warning("Unable to retrieve Ghast flying speed attribute.");
         }
 
-        // Consume one harness
+        // Consume harness and feedback
         inHand.setAmount(inHand.getAmount() - 1);
         player.getInventory().setItemInMainHand(inHand);
         player.sendMessage("§aYou harnessed the Ghast! It's now happier and faster.");
+        plugin.getLogger().info("Harness item consumed and player notified.");
     }
 }

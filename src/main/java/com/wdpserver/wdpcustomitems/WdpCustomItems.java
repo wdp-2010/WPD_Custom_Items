@@ -1,16 +1,13 @@
 package com.wdpserver.wdpcustomitems;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.boss.BossBar;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.inventory.PrepareItemCraftEvent;
-import org.bukkit.event.inventory.PrepareSmithingEvent;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.checkerframework.checker.units.qual.N;
 
 import java.util.*;
 
@@ -30,6 +27,7 @@ public class WdpCustomItems extends JavaPlugin {
     public NamespacedKey catapultKey;
     public NamespacedKey ghastHarnessKey;
     public NamespacedKey harnessAppliedKey;
+    public NamespacedKey speedModifierKey;
 
     public final Map<UUID, Boolean> hasBeam = new HashMap<>();
     public final Map<UUID, Long> cooldowns = new HashMap<>();
@@ -65,19 +63,20 @@ public class WdpCustomItems extends JavaPlugin {
         // Namespaced keys
         diaBeamSwordKey = new NamespacedKey(this, "diaBeamSword");
         netheriteBeamSwordKey = new NamespacedKey(this, "netheriteBeamSword");
-        boltKey = new NamespacedKey(this, "boltkey");
+        boltKey = new NamespacedKey(this, "bolt_key");
         beamDamageKey = new NamespacedKey(this, "beam_damage");
         beamColorKey = new NamespacedKey(this, "beam_color");
         beamKnockbackKey = new NamespacedKey(this, "beam_knockback");
-        beamCooldownKey = new NamespacedKey(this, "beamdefcooldown");
-        beamRangeKey= new NamespacedKey(this, "beamrange");
+        beamCooldownKey = new NamespacedKey(this, "beam_def_cooldown");
+        beamRangeKey= new NamespacedKey(this, "beam_range");
         beamStoneKey = new NamespacedKey(this, "beamstone");
         throwStoneKey = new NamespacedKey(this, "throwstone");
-        jumpBootsKey = new NamespacedKey(this, "doublejumpboots");
-        grapplingKey = new NamespacedKey(this, "grapplinghook");
+        jumpBootsKey = new NamespacedKey(this, "double_jump_boots");
+        grapplingKey = new NamespacedKey(this, "grappling_hook");
         catapultKey = new NamespacedKey(this, "catapult");
-        ghastHarnessKey    = new NamespacedKey(this, "ghast_harness");
-        harnessAppliedKey  = new NamespacedKey(this, "harness_applied");
+        ghastHarnessKey   = new NamespacedKey(this, "ghast_harness");
+        harnessAppliedKey = new NamespacedKey(this, "harness_applied");
+        speedModifierKey  = new NamespacedKey(this, "happy_ghast_harness_speed");
 
         shortCooldownTimeMs = (long) (getConfig().getDouble("diamondbeam-sword.short-cooldown", 1.0) * 1000);
         longCooldownTimeMsGrappling = (long) (getConfig().getDouble("grappling-hook.cooldown", 5.0) * 1000);
@@ -90,6 +89,7 @@ public class WdpCustomItems extends JavaPlugin {
         registerJumpBootsRecipe();
         registerGrapplingHookRecipe();
         registerCatapultRecipe();
+        registerHarnessRecipe();
 
         getServer().getPluginManager().registerEvents(new BeamHandler(this), this);
         getServer().getPluginManager().registerEvents(new RecolorCraftHandler(this), this);
@@ -98,6 +98,8 @@ public class WdpCustomItems extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new GraplingHandeler(this), this);
         getServer().getPluginManager().registerEvents(new SwordCraftUpgrade(this), this);
         getServer().getPluginManager().registerEvents(new CatapultHandeler(this), this);
+        getServer().getPluginManager().registerEvents(new GhastHarnessHandler(this), this);
+
         getServer().getPluginManager().registerEvents(recipeCommand, this);
 
 
@@ -111,7 +113,6 @@ public class WdpCustomItems extends JavaPlugin {
 
         getLogger().info("WDP Custom Items started!");
 
-        new GhastHarnessHandler(this, ghastHarnessKey, harnessAppliedKey);
     }
 
 
@@ -152,6 +153,21 @@ public class WdpCustomItems extends JavaPlugin {
         sword.setItemMeta(meta);
         return sword;
     }
+
+    public ItemStack createHarness() {
+        ItemStack harness = new ItemStack(Material.WHITE_HARNESS);
+        ItemMeta meta = harness.getItemMeta();
+
+        meta.setMaxStackSize(32);
+        meta.setDisplayName("§bSpeed Harness");
+        meta.setLore(List.of("§fMakes your happy ghast go fast"));
+        meta.getPersistentDataContainer().set(ghastHarnessKey, PersistentDataType.BYTE, (byte) 1);
+
+        harness.setItemMeta(meta);
+        return harness;
+
+    }
+
     public ItemStack createCatapult() {
         ItemStack bow = new ItemStack(Material.BOW);
         ItemMeta meta = bow.getItemMeta();
@@ -369,6 +385,26 @@ public class WdpCustomItems extends JavaPlugin {
         recipe.setIngredient('F', Material.FISHING_ROD);
 
         recipeManager.registerRecipe("Grappling Hook", key, recipe);
+
+        getServer().addRecipe(recipe);
+    }
+
+    public void registerHarnessRecipe() {
+        ItemStack result = createHarness();
+        NamespacedKey key = this.ghastHarnessKey;
+        ShapedRecipe recipe = new ShapedRecipe(key, result);
+
+        recipe.shape(
+                "DND",
+                "DHD",
+                "DDD"
+        );
+
+        recipe.setIngredient('N', Material.NETHER_STAR);
+        recipe.setIngredient('H', Material.WHITE_HARNESS);
+        recipe.setIngredient('D', Material.DIAMOND);
+
+        recipeManager.registerRecipe("Fast Harness", key, recipe);
 
         getServer().addRecipe(recipe);
     }
