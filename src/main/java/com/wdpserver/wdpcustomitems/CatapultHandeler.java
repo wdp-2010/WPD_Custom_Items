@@ -2,6 +2,8 @@ package com.wdpserver.wdpcustomitems;
 
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.BlockDisplay;
 import org.bukkit.entity.Player;
@@ -16,8 +18,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
-
-import java.lang.ref.WeakReference;
+import org.joml.Vector3f;
 
 public class CatapultHandeler implements Listener {
 
@@ -30,7 +31,7 @@ public class CatapultHandeler implements Listener {
     }
 
     @EventHandler
-    public void OnShoot(@NotNull EntityShootBowEvent event) {
+    public void onShoot(@NotNull EntityShootBowEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
 
         ItemStack bow = event.getBow();
@@ -39,62 +40,78 @@ public class CatapultHandeler implements Listener {
         ItemMeta meta = bow.getItemMeta();
         if (meta == null) return;
 
+        // Check if it's our special bow
         if (!meta.getPersistentDataContainer().has(plugin.catapultKey, PersistentDataType.BYTE)) return;
 
+        // Get offhand item
         ItemStack offhand = player.getInventory().getItemInOffHand();
-        if (offhand == null || !offhand.getType().isBlock()) {
-            player.sendMessage("You have no block in your off-hand");
-            return;
-        }
+        if (offhand == null || !offhand.getType().isBlock()) return;
 
-        // Store block type in arrow's PDC
+        // Store the block type in the arrow
         Arrow arrow = (Arrow) event.getProjectile();
         arrow.getPersistentDataContainer().set(storedBlockKey, PersistentDataType.STRING, offhand.getType().name());
 
-        // Spawn display entity to follow the arrow
-        BlockDisplay display = player.getWorld().spawn(player.getEyeLocation(), BlockDisplay.class);
-        display.setBlock(offhand.getType().createBlockData());
+        // Create a centered display block (visual only)
+        Location arrowLocation = arrow.getLocation();
+        BlockData blockData = offhand.getType().createBlockData();
+
+        // Spawn display at arrow location initially
+        BlockDisplay display = arrow.getWorld().spawn(arrow.getLocation(), BlockDisplay.class);
+        display.setBlock(blockData);
+
         display.setTransformation(new Transformation(
-                new Vector(0, 0, 0).toVector3f(),
+                new Vector3f(-0.5f, -0.5f, -0.5f), // Shift origin to center the block display
                 display.getTransformation().getLeftRotation(),
-                new Vector(1, 1, 1).toVector3f(),
+                new Vector3f(1f, 1f, 1f),          // Scale stays 1
                 display.getTransformation().getRightRotation()
         ));
 
-        // Track arrow and update display
-        WeakReference<Arrow> arrowRef = new WeakReference<>(arrow);
+
+
+        // Track the arrow and move the display with it
         new BukkitRunnable() {
             @Override
             public void run() {
-                Arrow a = arrowRef.get();
-                if (a == null || a.isDead() || a.isOnGround() || !a.isValid()) {
+                if (arrow.isDead() || arrow.isInBlock() || arrow.isOnGround()) {
                     display.remove();
                     cancel();
                     return;
                 }
-                display.teleport(a.getLocation());
+
+                display.teleport(arrow.getLocation());
             }
-        }.runTaskTimer(plugin, 1L, 1L);
+        }.runTaskTimer(plugin, 0L, 1L);
+
     }
+
 
     @EventHandler
     public void onArrowHit(@NotNull ProjectileHitEvent event) {
         if (!(event.getEntity() instanceof Arrow arrow)) return;
+        if (event.getHitBlock() == null || event.getHitBlockFace() == null) return;
 
-        if (!arrow.getPersistentDataContainer().has(storedBlockKey, PersistentDataType.STRING)) return;
+        Block hitBlock = event.getHitBlock();
+        BlockFace face = event.getHitBlockFace();
 
+        Bukkit.getLogger().info("Arrow hit face: " + face + " at block: " + hitBlock.getType());
+
+        // Get the stored block type
         String blockName = arrow.getPersistentDataContainer().get(storedBlockKey, PersistentDataType.STRING);
         if (blockName == null) return;
 
         Material blockType = Material.matchMaterial(blockName);
         if (blockType == null || !blockType.isBlock()) return;
 
-        Location hitLoc = arrow.getLocation().getBlock().getLocation();
-        Block block = hitLoc.getBlock();
-        if (block.getType().isAir() || block.isReplaceable()) {
-            block.setType(blockType);
+        // Get block on the side that was hit
+        Block placeBlock = hitBlock.getRelative(face);
+
+        if (placeBlock.getType().isAir() || placeBlock.isReplaceable()) {
+            placeBlock.setType(blockType);
+            Bukkit.getLogger().info("Placed block: " + blockType + " at " + placeBlock.getLocation());
+        } else {
+            Bukkit.getLogger().info("Could not place block: " + blockType + " at " + placeBlock.getLocation() + " (blocked)");
         }
 
-        arrow.remove(); // Clean up arrow
+        arrow.remove(); // Optional cleanup
     }
 }
